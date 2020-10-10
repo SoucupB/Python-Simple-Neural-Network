@@ -1,6 +1,7 @@
 
 import random
 from Neuron import Neuron
+from struct import pack, unpack
 class NeuralNetwork():
     def random_value(self):
         return random.uniform(-0.1, 0.1)
@@ -38,6 +39,34 @@ class NeuralNetwork():
         for i in range(len(self.hidden)):
             for j in range(len(self.hidden[i])):
                 self.biases[i].tie(self.hidden[i][j].ID, self.random_value())
+    def save_bot(self, file_name):
+        fd = open(file_name, "w+")
+        fd.write(str(len(self.tie_values)) + "\n")
+        for c_tuple in self.tie_values:
+            fd.write(str(c_tuple[0]) + "\n")
+            fd.write(str(c_tuple[1]) + "\n")
+            fd.write(str(self.tie_values[c_tuple]) + "\n")
+        fd.close()
+
+    def mutate(self, percent, mutate_rate):
+        for index in self.tie_values:
+            if random.uniform(0, 1) < percent:
+                (a, b) = index
+                mutate_value = random.uniform(-mutate_rate, mutate_rate) * self.tie_values[(a, b)]
+                self.tie_values[(a, b)] += mutate_value
+                self.tie_values[(b, a)] += mutate_value
+
+    def load_bot(self, file_name):
+        fd = open(file_name, "r+")
+        map_size = int(fd.readline())
+        assert(map_size != self.tie_values)
+        for index in range(map_size):
+            a = int(fd.readline())
+            b = int(fd.readline())
+            c = float(fd.readline())
+            self.tie_values[(a, b)] = c
+        fd.close()
+
     def clear_Neurons(self):
         for i in range(len(self.hidden)):
             for j in range(len(self.hidden[i])):

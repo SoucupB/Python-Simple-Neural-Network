@@ -1,3 +1,4 @@
+import random
 class Neuron():
     def __init__(self, ID, Neuron_map, tie_values, value = None):
         self.ID = ID
@@ -52,8 +53,18 @@ class Neuron():
             child_tenson.non_derived_value = child_tenson.value
 
     def optimize(self, lr):
+        self.optimize_sgd(lr)
+
+    def optimize_sgd(self, lr):
          for parent in self.parents:
             current_parrent = self.get_child_by_ID(parent)
             current_gradient = self.tie_values[(current_parrent.ID, self.ID)] + self.error * lr * self.d_activation_function_applyer() * current_parrent.value
+            self.tie_values[(current_parrent.ID, self.ID)] = current_gradient
+            self.tie_values[(self.ID, current_parrent.ID)] = current_gradient
+
+    def optimize_error(self, lr):
+         for parent in self.parents:
+            current_parrent = self.get_child_by_ID(parent)
+            current_gradient = self.tie_values[(current_parrent.ID, self.ID)] + self.error * random.uniform(0, 0.2) * self.d_activation_function_applyer() * current_parrent.value
             self.tie_values[(current_parrent.ID, self.ID)] = current_gradient
             self.tie_values[(self.ID, current_parrent.ID)] = current_gradient
