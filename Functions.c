@@ -36,11 +36,17 @@ float func_SquaredError(float a, float b) {
 }
 
 float func_CrossEntropy(float a, float b) {
-    return -(a * log(b) + (1 - a) * log(1 - b + 1e-5));
+    return -(a * log(b + 1e-5) + (1 - a) * log(1 - b + 1e-5));
 }
 
 int32_t func_TotalFunctions() {
     return 3;
+}
+
+long func_Time() {
+    struct timespec _t;
+    clock_gettime(CLOCK_REALTIME, &_t);
+    return _t.tv_sec * 1000 + lround(_t.tv_nsec / 1.0e6);
 }
 
 struct Function_t *func_GetActivationFunctions() {

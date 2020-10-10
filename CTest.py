@@ -19,6 +19,7 @@ class NeuralNetwork():
         self.neuralNet = self.fun.nn_InitMetaParameters(raw_array, len(self.input_array), c_lr, configuration_array)
         self.fun.elementFromBuffer.restype = ctypes.c_float
         self.fun.nn_Optimize.restype = ctypes.c_float
+        self.fun.func_Uniform.restype = ctypes.c_float
 
     def show_weights(self):
         self.fun.nn_ShowWeights(self.neuralNet)
@@ -54,7 +55,10 @@ class NeuralNetwork():
     def load_weights(self):
         self.fun.nn_LoadFile(self.neuralNet)
 
-# nn = NeuralNetwork([2, 4, 4, 2], 0.1, [RELU, TANH, SIGMOID])
+    def get_random(self, a, b):
+        return self.fun.func_Uniform(ctypes.c_float(a), ctypes.c_float(b))
+
+nn = NeuralNetwork([2, 4, 4, 2], 0.1, [RELU, TANH, SIGMOID])
 # millis = int(round(time.time() * 1000))
 # for index in range(18000): #modify this number of batches in order to train more or less
 #     sr = [[1, 0], [0, 1], [1, 1], [0, 0]]
@@ -70,3 +74,5 @@ class NeuralNetwork():
 # nn.save_weights()
 
 # nn.destroy_nn()
+
+print(nn.get_random(4, 9))

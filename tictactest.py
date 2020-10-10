@@ -234,6 +234,7 @@ game([], actor_net, 1)
 
 #actor_net.save_weights()
 
-#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c -o NeuralNetwork.so -O3
-#gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c main.c -o program -O3 -lm
+#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -o NeuralNetwork.so -O3
+#gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm
+#gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainQTEST.c QAgent.c -o program -Wall -O9 -lm
 

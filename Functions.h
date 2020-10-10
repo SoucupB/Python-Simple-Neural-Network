@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 struct Function_t {
     float (*func)(float);
@@ -16,3 +17,4 @@ struct Function_t *func_GetActivationFunctions();
 struct Function_t *func_GetDActivationFunctions();
 int32_t func_TotalFunctions();
 float func_Gaussian();
+long func_Time();
