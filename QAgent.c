@@ -48,6 +48,7 @@ void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actio
         stateMixedWithAction[actionIndex[i] + self->stateSize] = 1;
         float *netGuess = nn_FeedForward(self->brain, inputBuffer[i], self->stateSize);
         result[i] = netGuess[0] + self->lr * (result[i + 1] - netGuess[0]);
+        stateMixedWithAction[actionIndex[i] + self->stateSize] = 0;
         free(netGuess);
     }
     for(int32_t i = size - 1; i >= 0; i--) {
@@ -57,6 +58,7 @@ void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actio
         stateMixedWithAction[actionIndex[i] + self->stateSize] = 1;
         float resultVector[] = {result[i]};
         nn_Optimize(self->brain, stateMixedWithAction, self->numberOfActions + self->stateSize, resultVector, 1);
+        stateMixedWithAction[actionIndex[i] + self->stateSize] = 0;
     }
 }
 

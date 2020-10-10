@@ -5,6 +5,35 @@
 #include "Functions.h"
 #include "QAgent.h"
 
+// void testQTraining(QAgent agent) {
+//     float inputArray[][16] = {
+//                         {
+//                             0, 0, 0,
+//                             0, 1, 0,
+//                             0, 0, 0
+//                         },
+//                         {
+//                             0, 0, -1,
+//                             0, 1, 1,
+//                             0, 0, 0
+//                         },
+//                         {
+//                             0, 0, -1,
+//                             -1, 1, 1,
+//                             0, 1, 0
+//                         },
+//                         {
+//                             0, -1, -1,
+//                             -1, 1, 1,
+//                             0, 1, 1
+//                         }
+//     };
+//     int32_t finalReward = 1.0;
+//     int32_t actionsTaken[] = {2, 3, 1, 0};
+//     qa_TrainTemporalDifference(agent, inputArray, actionsTaken, finalReward, 4);
+//     printf("Done training!\n");
+// }
+
 int main() {
     // TicTacToe board qa testing!.
     NeuralNetwork network;
@@ -31,6 +60,7 @@ int main() {
     }
     printf("Choosed %d actions based on the neural nets guess on this tictactoe board!\n", maxIterations);
     printf("Done in: %ld miliseconds\n", func_Time() - mil);
+    //testQTraining(agent);
     qa_Destroy(agent);
     nn_Destroy(network);
     printf("Memory freed!");
