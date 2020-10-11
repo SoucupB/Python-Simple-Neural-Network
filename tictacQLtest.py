@@ -191,8 +191,8 @@ def batch_game(display, agent, t_batches, index):
     return (s, f, d)
 
 def plot(games, wins, draws):
-    plt.xlabel('matches')
-    plt.ylabel('wins + draws')
+    plt.xlabel('batches!')
+    plt.ylabel('wins + draws of the Q agent (per 1000 matches!)')
     plt.title("TicTacToe Deep Q Learning Agent vs random agent")
     plt.plot(games, wins)
     plt.savefig("Plots/TicTacToe_wins.png")
@@ -216,7 +216,7 @@ def instance(order):
     if order == 0:
         for index in range(total_batches):
             fitness = batch_game(0, agent, number_of_games_per_batch, index)
-            games_number.append(number_of_games_per_batch * (index + 1))
+            games_number.append((index + 1))
             wins.append(fitness[0] + fitness[2])
             draws.append(fitness[2])
         plot(games_number, wins, draws)
