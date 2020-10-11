@@ -148,7 +148,6 @@ void nn_LoadFile(NeuralNetwork network) {
     fscanf(fd, "%d", &totalWeights);
     for(int32_t i = 0; i < totalWeights; i++) {
         fscanf(fd, "%d %d %f", &a, &b, &c);
-        //printf("%d %d %f\n", a, b, c);
         saveWeight(network->hash, a, b, c);
     }
     fclose(fd);

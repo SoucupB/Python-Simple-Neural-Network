@@ -37,29 +37,74 @@ int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedA
     return actionIndex;
 }
 
+float getQValueFromState(QAgent self, float *state, int32_t action) {
+    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
+    for(int32_t j = 0; j < self->stateSize; j++) {
+        stateMixedWithAction[j] = state[j];
+    }
+    stateMixedWithAction[action + self->stateSize] = 1;
+    float *qValueBuffer = nn_FeedForward(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions);
+    float qValue = qValueBuffer[0];
+    free(qValueBuffer);
+    return qValue;
+}
+
+void optimizeQValue(QAgent self, float *state, int32_t action, float value) {
+    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
+    for(int32_t j = 0; j < self->stateSize; j++) {
+        stateMixedWithAction[j] = state[j];
+    }
+    float resultVector[] = {value};
+    stateMixedWithAction[action + self->stateSize] = 1;
+    nn_Optimize(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions, resultVector, 1);
+}
+
 void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actionIndex, float endStateReward, int32_t size) {
     float *result = malloc(sizeof(float) * size);
     result[size - 1] = endStateReward;
-    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
     for(int32_t i = size - 2; i >= 0; i--) {
-        for(int32_t j = 0; j < self->stateSize; j++) {
-            stateMixedWithAction[j] = inputBuffer[i][j];
-        }
-        stateMixedWithAction[actionIndex[i] + self->stateSize] = 1;
-        float *netGuess = nn_FeedForward(self->brain, inputBuffer[i], self->stateSize);
-        result[i] = netGuess[0] + self->lr * (result[i + 1] - netGuess[0]);
-        stateMixedWithAction[actionIndex[i] + self->stateSize] = 0;
-        free(netGuess);
+        float qValue = getQValueFromState(self, inputBuffer[i], actionIndex[i]);
+        result[i] = qValue + self->lr * (result[i + 1] - qValue);
     }
     for(int32_t i = size - 1; i >= 0; i--) {
-        for(int32_t j = 0; j < self->stateSize; j++) {
-            stateMixedWithAction[j] = inputBuffer[i][j];
-        }
-        stateMixedWithAction[actionIndex[i] + self->stateSize] = 1;
-        float resultVector[] = {result[i]};
-        nn_Optimize(self->brain, stateMixedWithAction, self->numberOfActions + self->stateSize, resultVector, 1);
-        stateMixedWithAction[actionIndex[i] + self->stateSize] = 0;
+        optimizeQValue(self, inputBuffer[i], actionIndex[i], result[i]);
     }
+    free(result);
+}
+
+float getMaxQValue(QAgent self, float *currentState) {
+    float maximum = -1e9;
+    int32_t actionsNumber = self->numberOfActions;
+    for(int32_t i = 0; i < actionsNumber; i++) {
+        float qValue = getQValueFromState(self, currentState, i);
+        if(qValue > maximum) {
+            maximum = qValue;
+        }
+    }
+    return maximum;
+}
+
+void qa_TrainDeepQNet(QAgent self, float **inputBuffer, int32_t *actionIndex, float *rewards, int32_t size) {
+    float *discounterReward = malloc(sizeof(float) * size);
+    float *qDelta = malloc(sizeof(float) * size);
+    float discount = self->discount;
+    discounterReward[size - 1] = rewards[size - 1];
+    qDelta[size - 1] = discounterReward[size - 1];
+    for(int32_t i = size - 2; i >= 0; i--) {
+        discounterReward[i] = discounterReward[i + 1] + rewards[i] * discount;
+        discount *= self->discount;
+    }
+    for(int32_t i = size - 2; i >= 0; i--) {
+        float maxQValueNextState = getMaxQValue(self, inputBuffer[i + 1]);
+        float qValue = getQValueFromState(self, inputBuffer[i], actionIndex[i]);
+        float currentQValue = qValue + self->lr * (discounterReward[i] + maxQValueNextState - qValue);
+        qDelta[i] = currentQValue;
+    }
+    for(int32_t i = size - 1; i >= 0; i--) {
+        optimizeQValue(self, inputBuffer[i], actionIndex[i], qDelta[i]);
+    }
+    free(discounterReward);
+    free(qDelta);
 }
 
 void qa_Destroy(QAgent self) {

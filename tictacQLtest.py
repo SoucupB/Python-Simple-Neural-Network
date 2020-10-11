@@ -85,9 +85,10 @@ def bot_response(game_map):
             bot_map += l
     return bot_map
 
-def save_map(state, total_states, move):
+def save_map(state, actions, total_states, move):
     c_state = [x for x in state]
-    total_states.append([bot_response(c_state), move])
+    total_states.append(state)
+    actions.append(move)
 
 def actor_prediction(bot, game_map):
     bot_map = bot_response(game_map)
@@ -102,38 +103,18 @@ def select_actor_action(game_map, distribution):
             action_index = index
     return action_index
 
-def train(total_states, actor_bot, critic_net, response, total_actions):
-    goul = [0] * 9
-    goul[total_states[len(total_states) - 1][1]] = 1
-    critic_net.sgd(total_states[len(total_states) - 1][0] + goul, [response])
-    value_vec = [0] * len(total_states)
-    lr = 0.1
-    value_vec[len(total_states) - 1] = response
-    for elements in range(len(total_states) - 2, -1, -1):
-        goul = [0] * 9
-        goul[total_states[elements][1]] = 1
-        feed_resp = critic_net.feed_forward(total_states[elements][0] + goul)
-        value = (value_vec[elements + 1] - feed_resp[0]) * lr
-        critic_net.sgd(total_states[elements][0] + goul, [value])
-        value_vec[elements] = value
-    for elements in range(len(total_states) - 1, -1, -1):
-        goul = [0] * 9
-        max_value = -1e9
-        best_index = 0
-        for index in range(total_actions):
-            goul[index] = 1
-            current_value = critic_net.feed_forward(total_states[elements][0] + goul)
-            if current_value[0] > max_value:
-                max_value = current_value[0]
-                best_index = index
-            goul[index] = 0
-        goul[best_index] = 1
-       # print(total_states[elements][0], goul)
-        actor_bot.sgd(total_states[elements][0], goul)
-   # print()
-   # exit()
 
+def train_TD(total_states, actions, agent, reward):
+    agent.trainTemporalDifference(total_states, actions, reward)
 
+def train_QValues(total_states, actions, agent, reward):
+    rew = [0] * len(total_states)
+    rew[len(total_states) - 1] = reward
+    agent.trainDeepQValue(total_states, actions, rew)
+
+def train(total_states, actions, agent, reward):
+    train_TD(total_states, actions, agent, reward)
+   # train_QValues(total_states, actions, agent, reward)
 
 def show_game(game_map):
     for i in range(3):
@@ -142,16 +123,16 @@ def show_game(game_map):
         print()
     print(finish_state(game_map))
 
-def game(states, net, display):
+def game(states, actions, agent, display):
     game_map = [0] * 9
     f = 0
     s = 0
     d = 0
     while(finish_state(game_map) == 0):
         first_move = random_player(game_map, 1)
-        bot_map = bot_response(game_map)
-        print(bot_map, net.feed_forward(bot_map))
-        exit()
+       # bot_map = bot_response(game_map)
+       # print(bot_map, agent.feed_forward(bot_map))
+       # exit()
         if game_map[first_move] != 0:
             return 2
         game_map[first_move] = 1
@@ -161,8 +142,8 @@ def game(states, net, display):
             return 1
         if draw(game_map) == 1:
             return 0
-        second_move = get_best_action(game_map, net, 2)
-        save_map(game_map, states, second_move)
+        second_move = get_best_action(game_map, agent, 2)
+        save_map(bot_response(game_map), actions, states, second_move)
         if game_map[second_move] != 0:
             return 1
         game_map[second_move] = 2
@@ -175,18 +156,13 @@ def game(states, net, display):
     return -1
 
 def get_best_action(game_map, bot, player):
-    return select_actor_action(game_map, actor_prediction(bot, game_map))
-    # maximum = -1e9
-    # bot_map = bot_response(game_map)
-    # value = bot.feed_forward(bot_map)
-    # best_index = 0
-    # for guess in range(len(value)):
-    #     if game_map[guess] > maximum and game_map[guess] == 0:
-    #         maximum = game_map[guess]
-    #         best_index = guess
-    # return best_index
+    prohibited_actions = []
+    for index in range(len(game_map)):
+        if game_map[index] != 0:
+            prohibited_actions.append(index)
+    return bot.getBestAction(bot_response(game_map), prohibited_actions)
 
-def batch_game(display, actor_net, t_batches, critic_net):
+def batch_game(display, agent, t_batches, index):
     batches = t_batches
     ind = 0
     f = 0
@@ -194,48 +170,41 @@ def batch_game(display, actor_net, t_batches, critic_net):
     d = 0
     while ind < batches:
         states = []
-        result = game(states, actor_net, 0)
+        actions = []
+        result = game(states, actions, agent, 0)
         if result == 1:
-            train(states, actor_net, critic_net, 0, 9)
+            train(states, actions, agent, 0)
             f += 1
         if result == 2:
-            train(states, actor_net, critic_net, 1, 9)
+            train(states, actions, agent, 1)
             s += 1
         if result == 0:
-            train(states, actor_net, critic_net, 0.5, 9)
+            train(states, actions, agent, 0.5)
             d += 1
         ind += 1
     if f == 0:
-        print(10)
-    print(((d / 2 + s) / f))
+        print(index, t_batches)
+    print(index, ((d / 2 + s) / f))
     if f == 0:
-        return 10
+        return t_batches
     return ((d / 2 + s) / f)
 
+def instance(order):
+    total_batches = 60
+    nets_number = 1
+    critic_net = NeuralNetwork([27, 35, 1], 0.17, [RELU, SIGMOID])
+    agent = QAgent(critic_net, 0.2, 0.99, 9)
+    if order == 0:
+        for index in range(total_batches):
+            for crt in range(nets_number):
+                fitness = batch_game(0, agent, 1000, index)
+        critic_net.save_weights()
+    else:
+        critic_net.load_weights()
+        game([], [], agent, 1)
+instance(1)
 
-total_batches = 15
-nets_number = 1
-#npt = Neat(nets_number, [9, 9], 0.07, 0.01)
-actor_net = NeuralNetwork([18, 28, 28, 9], 0.09, [RELU, RELU, SIGMOID])# sigmoid, d_sigmoid)
-#actor_net.load_bot("actor.tr")
-critic_net = NeuralNetwork([27, 27, 27, 1], 0.08, [RELU, RELU, SIGMOID])#, sigmoid, d_sigmoid)
-#actor_net.lr = 0.1
-#critic_net.lr = 0.13
-
-# for index in range(total_batches):
-#     for crt in range(nets_number):
-#         fitness = batch_game(0, actor_net, 1000, critic_net)
-      #  npt.add_fitness(crt, fitness)
-    #npt.next_population()
-#actor_net.load_bot("actor.tr")
-#actor_net = NeuralNetwork([18, 23, 9], sigmoid, d_sigmoid)
-# # actor_net.save_bot("actor.tr")
-actor_net.load_weights()
-game([], actor_net, 1)
-
-#actor_net.save_weights()
-
-#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -o NeuralNetwork.so -O3
+#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O3
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainQTEST.c QAgent.c -o program -Wall -O9 -lm
 
