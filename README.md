@@ -20,7 +20,7 @@ To create and test it in C exclusively use this command!
 
     gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o application -Wall -O9 -lm
 
-Then run application in C only, run!
+Then run application in C only!
 
     ./application
 
