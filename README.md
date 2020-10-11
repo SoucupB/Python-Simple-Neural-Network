@@ -40,7 +40,7 @@ QAgent is the component used for a game agent, see tictacQLtest.py for the ticta
 
 # Examples
 Here is a graph that portray the evolution of the Q agent against a random agent.
-The agent is playing 10 batches of 1000 games each!
+The agent is playing 10 batches of 1000 games each! (It plays as the 'O' player and random player plays as 'X')
 
 To run this example run
 
