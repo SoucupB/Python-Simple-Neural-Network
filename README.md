@@ -16,23 +16,31 @@ GCC (x86_64-posix-seh-rev0, Built by MinGW-W64 project) > 8.1.0 (It might work w
 While it might be a python library it can be used in C aswell (See MainXOR.c for the XOR problem solved with the neural network).
 Here is an example of TICTACTOE bot implemented with the help of this library and its Q learning methods (See tictacQLtes.py).
 Before everything, the C library should be compiled with the command!
+<br>
 <code>
 gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 </code>
+<br>
 This will create a shared binary library in order for python to make is work!
 <br>
 To test it in C exclusively use this command!
+<br>
 <code>
 gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o application -Wall -O9 -lm
 </code>
+<br>
 Then run application with!
+<br>
 <code>
 ./application
 </code>
+<br>
 
 To run this example run
+<br>
 <code>
 python tictacQLtest.py
 </code>
+<br>
 ![alt text](Plots/TicTacToe_wins.png)
 
