@@ -196,16 +196,9 @@ def plot(games, wins, draws):
     plt.title("TicTacToe Deep Q Learning Agent vs random agent")
     plt.plot(games, wins)
     plt.savefig("Plots/TicTacToe_wins.png")
-
-    # plt.xlabel('matches')
-    # plt.ylabel('draws')
-    # plt.title("TicTacToe QLearning Agent vs random player")
-
-   # plt.plot(games, draws)
-  #  plt.savefig("TicTacToe_draws.png")
     return 0
 def instance(order):
-    total_batches = 10
+    total_batches = 350
     nets_number = 1
     number_of_games_per_batch = 1000
     critic_net = NeuralNetwork([27, 27, 27, 1], 0.17, [RELU, RELU, SIGMOID])
