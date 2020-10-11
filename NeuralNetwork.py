@@ -7,7 +7,7 @@ RELU = 2
 
 class NeuralNetwork():
     def __init__(self, input_array, lr, configuration):
-        self.fun = ctypes.CDLL("NeuralNetwork.so")
+        self.fun = ctypes.CDLL("Components/NeuralNetwork.so")
         self.input_array = input_array
         self.lr = lr
         self.configuration = configuration

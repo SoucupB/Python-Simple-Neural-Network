@@ -14,11 +14,11 @@ While it might be a python library it can be used in C aswell (See MainXOR.c for
 # Compilation
 This will compile the C backend library for the python interface
 
-    gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
+    gcc -fPIC -shared Components/NeuralNetwork.c Components/hashmap.c Components/Functions.c Components/Neuron.c Components/QAgent.c -Wall -o Components/NeuralNetwork.so -O9
 
 To create and test it in C exclusively use this command!
 
-    gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o application -Wall -O9 -lm
+    gcc Components/NeuralNetwork.c Components/hashmap.c Components/Functions.c Components/Neuron.c Components/MainXOR.c Components/QAgent.c -o application -Wall -O9 -lm
 
 Then run application in C only!
 

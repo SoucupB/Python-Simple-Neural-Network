@@ -29,7 +29,7 @@ class QAgent():
         return buffer_arr
 
     def __init__(self, neuralNet, lr, discountFactor, numberOfActions):
-        self.fun = ctypes.CDLL("NeuralNetwork.so")
+        self.fun = ctypes.CDLL("Components/NeuralNetwork.so")
         self.lr = lr
         self.neuralNet = neuralNet
         self.discountFactor = discountFactor
