@@ -12,11 +12,11 @@ Here is an example of TICTACTOE bot implemented with the help of this library an
 Before everything, the C library should be compiled with the command!
 
 # Compilation
+This will compile the C backend library for the python interface
 
     gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 
-This will compile the C backend library for the python interface in order to make it work!
-To test it in C exclusively use this command!
+To create and test it in C exclusively use this command!
 
     gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o application -Wall -O9 -lm
 
