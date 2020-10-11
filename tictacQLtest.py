@@ -1,4 +1,4 @@
-from CTest import NeuralNetwork, SIGMOID, RELU, TANH
+from NeuralNetwork import NeuralNetwork, SIGMOID, RELU, TANH
 from QAgent import QAgent
 import math
 import random
@@ -190,28 +190,41 @@ def batch_game(display, agent, t_batches, index):
         return t_batches
     return (s, f, d)
 
-def plot(games, wins):
+def plot(games, wins, draws):
     plt.xlabel('matches')
     plt.ylabel('wins + draws')
-    plt.title("TicTacToe QLearning Agent vs random player")
+    plt.title("TicTacToe Deep Q Learning Agent vs random agent")
     plt.plot(games, wins)
+    plt.savefig("Plots/TicTacToe_wins.png")
+
+    # plt.xlabel('matches')
+    # plt.ylabel('draws')
+    # plt.title("TicTacToe QLearning Agent vs random player")
+
+   # plt.plot(games, draws)
+  #  plt.savefig("TicTacToe_draws.png")
     return 0
 def instance(order):
-    total_batches = 450
+    total_batches = 10
     nets_number = 1
+    number_of_games_per_batch = 1000
     critic_net = NeuralNetwork([27, 27, 27, 1], 0.17, [RELU, RELU, SIGMOID])
     agent = QAgent(critic_net, 0.2, 0.99, 9)
     games_number = []
     wins = []
+    draws = []
     if order == 0:
         for index in range(total_batches):
-            for crt in range(nets_number):
-                fitness = batch_game(0, agent, 1000, index)
+            fitness = batch_game(0, agent, number_of_games_per_batch, index)
+            games_number.append(number_of_games_per_batch * (index + 1))
+            wins.append(fitness[0] + fitness[2])
+            draws.append(fitness[2])
+        plot(games_number, wins, draws)
         critic_net.save_weights()
     else:
         critic_net.load_weights()
         game([], [], agent, 1)
-instance(1)
+instance(0)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm

@@ -1,116 +1,79 @@
+import ctypes
+import math
+import time
+SIGMOID = 0
+TANH = 1
+RELU = 2
 
-import random
-from Neuron import Neuron
-from struct import pack, unpack
 class NeuralNetwork():
-    def random_value(self):
-        return random.uniform(-0.1, 0.1)
-
-    def __init__(self, params, activation_function, d_activation_function):
-        self.input_Neurons = []
-        self.hidden = []
-        self.lr = 0.3
-        self.biases = []
-        self.tie_values = {}
-        self.Neuron_map = {}
-        for index in range(params[0]):
-            self.input_Neurons.append(Neuron(index, self.Neuron_map, self.tie_values, 0))
-            self.input_Neurons[index].activation_function = activation_function
-            self.input_Neurons[index].d_activation_function = d_activation_function
-        offset = 0
-        for index in range(1, len(params)):
-            offset += params[index - 1]
-            current_hiddens = []
-            for current_layer in range(params[index]):
-                current_hiddens.append(Neuron(current_layer + offset, self.Neuron_map, self.tie_values, 0))
-                current_hiddens[current_layer].activation_function = activation_function
-                current_hiddens[current_layer].d_activation_function = d_activation_function
-            self.hidden.append(current_hiddens)
-        offset += params[len(params) - 1]
-        for i in range(len(self.input_Neurons)):
-            for j in range(len(self.hidden[0])):
-                self.input_Neurons[i].tie(self.hidden[0][j].ID, self.random_value())
-        for i in range(len(self.hidden) - 1):
-            for j in range(len(self.hidden[i])):
-                for k in range(len(self.hidden[i + 1])):
-                    self.hidden[i][j].tie(self.hidden[i + 1][k].ID, self.random_value())
-        for index in range(len(self.hidden)):
-            self.biases.append(Neuron(offset + index + 1, self.Neuron_map, self.tie_values, 1))
-        for i in range(len(self.hidden)):
-            for j in range(len(self.hidden[i])):
-                self.biases[i].tie(self.hidden[i][j].ID, self.random_value())
-    def save_bot(self, file_name):
-        fd = open(file_name, "w+")
-        fd.write(str(len(self.tie_values)) + "\n")
-        for c_tuple in self.tie_values:
-            fd.write(str(c_tuple[0]) + "\n")
-            fd.write(str(c_tuple[1]) + "\n")
-            fd.write(str(self.tie_values[c_tuple]) + "\n")
-        fd.close()
-
-    def mutate(self, percent, mutate_rate):
-        for index in self.tie_values:
-            if random.uniform(0, 1) < percent:
-                (a, b) = index
-                mutate_value = random.uniform(-mutate_rate, mutate_rate) * self.tie_values[(a, b)]
-                self.tie_values[(a, b)] += mutate_value
-                self.tie_values[(b, a)] += mutate_value
-
-    def load_bot(self, file_name):
-        fd = open(file_name, "r+")
-        map_size = int(fd.readline())
-        assert(map_size != self.tie_values)
-        for index in range(map_size):
-            a = int(fd.readline())
-            b = int(fd.readline())
-            c = float(fd.readline())
-            self.tie_values[(a, b)] = c
-        fd.close()
-
-    def clear_Neurons(self):
-        for i in range(len(self.hidden)):
-            for j in range(len(self.hidden[i])):
-                self.hidden[i][j].value = 0
-                self.hidden[i][j].error = 0
-    def feed_forward(self, values):
-        response = []
-        self.clear_Neurons()
-        for i in range(len(self.input_Neurons)):
-            self.input_Neurons[i].value = values[i]
-            self.input_Neurons[i].feed_forward()
-        for i in range(len(self.hidden)):
-            self.biases[i].feed_forward()
-            for j in range(len(self.hidden[i])):
-                self.hidden[i][j].value = self.hidden[i][j].activation_function_applyer()
-                self.hidden[i][j].feed_forward()
-        for i in range(len(self.hidden[len(self.hidden) - 1])):
-            response.append(self.hidden[len(self.hidden) - 1][i].value)
-        return response
-
-    def sgd(self, inputs, outputs, loss_function):
-        nn_response = self.feed_forward(inputs)
-        total_error = 0
-        for index in range(len(outputs)):
-            loss_f = loss_function(outputs[index], nn_response[index])
-            total_error += abs(loss_f)
-            self.hidden[len(self.hidden) - 1][index].error = loss_f
-        for index in range(len(self.hidden) - 1, -1, -1):
-            for i in range(len(self.hidden[index])):
-                self.hidden[index][i].calculate_proportional_error_of_parents()
-        for index in range(len(self.hidden) - 1, -1, -1):
-            for i in range(len(self.hidden[index])):
-                self.hidden[index][i].optimize(self.lr)
-        return total_error
+    def __init__(self, input_array, lr, configuration):
+        self.fun = ctypes.CDLL("NeuralNetwork.so")
+        self.input_array = input_array
+        self.lr = lr
+        self.configuration = configuration
+        ints_array = ctypes.c_int * len(input_array)
+        configuration_array = ctypes.c_int * len(configuration)
+        raw_array = ints_array(*self.input_array)
+        configuration_array = configuration_array(*self.configuration)
+        c_lr = ctypes.c_float(self.lr)
+        self.neuralNet = self.fun.nn_InitMetaParameters(raw_array, len(self.input_array), c_lr, configuration_array)
+        self.fun.elementFromBuffer.restype = ctypes.c_float
+        self.fun.nn_Optimize.restype = ctypes.c_float
+        self.fun.func_Uniform.restype = ctypes.c_float
 
     def show_weights(self):
-        for i in range(len(self.input_Neurons)):
-            for j in range(len(self.input_Neurons[i].childs)):
-                print(self.tie_values[(self.input_Neurons[i].ID, self.input_Neurons[i].childs[j])], end = ' ')
-            print()
-        print()
-        for i in range(len(self.hidden)):
-            for Neuron in self.hidden[i]:
-                for child in Neuron.childs:
-                    print(self.tie_values[(Neuron.ID, child)], end = ' ')
-                print()
-            print()
+        self.fun.nn_ShowWeights(self.neuralNet)
+
+    def buffer_to_list(self, buffer, size):
+        return_buffer = []
+        for index in range(size):
+            return_buffer.append(self.fun.elementFromBuffer(buffer, ctypes.c_int(index)))
+        return return_buffer
+
+    def feed_forward(self, inputs):
+        c_inputs = ctypes.c_float * len(inputs)
+        input_array = c_inputs(*inputs)
+        response = self.fun.nn_FeedForward(self.neuralNet, input_array, len(input_array))
+        arr = ctypes.c_float * 1
+        list_of_results = self.buffer_to_list(response, self.input_array[len(self.input_array) - 1])
+        self.fun.func_FreePointer(response)
+        return list_of_results
+
+    def sgd(self, input, output):
+        c_inputs = ctypes.c_float * len(input)
+        input_array = c_inputs(*input)
+
+        c_output = ctypes.c_float * len(output)
+        output_array = c_output(*output)
+        return self.fun.nn_Optimize(self.neuralNet, input_array, len(input), output_array, len(output))
+
+    def destroy_nn(self):
+        self.fun.nn_Destroy(self.neuralNet)
+
+    def save_weights(self):
+        self.fun.nn_WriteFile(self.neuralNet)
+
+    def load_weights(self):
+        self.fun.nn_LoadFile(self.neuralNet)
+
+    def get_random(self, a, b):
+        return self.fun.func_Uniform(ctypes.c_float(a), ctypes.c_float(b))
+
+#nn = NeuralNetwork([2, 4, 4, 2], 0.1, [RELU, TANH, SIGMOID])
+# millis = int(round(time.time() * 1000))
+# for index in range(18000): #modify this number of batches in order to train more or less
+#     sr = [[1, 0], [0, 1], [1, 1], [0, 0]]
+#     pl = [[1, 1], [1, 0], [0, 0], [0, 1]]
+#     for i in range(len(sr)):
+#         nn.sgd(sr[i], pl[i])
+
+# print("Ended in! ", int(round(time.time() * 1000)) - millis)
+# print("For [1, 1], the net says is", nn.feed_forward([1, 1]))
+# print("For [1, 0], the net says is", nn.feed_forward([1, 0]))
+# print("For [0, 1], the net says is", nn.feed_forward([0, 1]))
+# print("For [0, 0], the net says is", nn.feed_forward([0, 0]))
+# nn.save_weights()
+
+# nn.destroy_nn()
+
+#print(nn.get_random(4, 9))

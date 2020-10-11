@@ -1,7 +1,7 @@
 import ctypes
 import math
 import time
-from CTest import NeuralNetwork, SIGMOID, TANH, RELU
+from NeuralNetwork import NeuralNetwork, SIGMOID, TANH, RELU
 SIGMOID = 0
 TANH = 1
 RELU = 2

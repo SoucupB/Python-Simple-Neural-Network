@@ -1,4 +1,4 @@
-from CTest import NeuralNetwork, SIGMOID, RELU, TANH
+from NeuralNetwork import NeuralNetwork, SIGMOID, RELU, TANH
 from QAgent import QAgent
 import math
 import random
