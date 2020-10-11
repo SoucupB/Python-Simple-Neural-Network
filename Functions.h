@@ -18,3 +18,4 @@ struct Function_t *func_GetDActivationFunctions();
 int32_t func_TotalFunctions();
 float func_Gaussian();
 long func_Time();
+void func_FreePointer(void *buffer);

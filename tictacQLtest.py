@@ -2,6 +2,7 @@ from CTest import NeuralNetwork, SIGMOID, RELU, TANH
 from QAgent import QAgent
 import math
 import random
+import matplotlib.pyplot as plt
 #from Neat import *
 
 def sigmoid(element):
@@ -187,13 +188,21 @@ def batch_game(display, agent, t_batches, index):
     print(index, ((d / 2 + s) / f))
     if f == 0:
         return t_batches
-    return ((d / 2 + s) / f)
+    return (s, f, d)
 
+def plot(games, wins):
+    plt.xlabel('matches')
+    plt.ylabel('wins + draws')
+    plt.title("TicTacToe QLearning Agent vs random player")
+    plt.plot(games, wins)
+    return 0
 def instance(order):
-    total_batches = 60
+    total_batches = 450
     nets_number = 1
-    critic_net = NeuralNetwork([27, 35, 1], 0.17, [RELU, SIGMOID])
+    critic_net = NeuralNetwork([27, 27, 27, 1], 0.17, [RELU, RELU, SIGMOID])
     agent = QAgent(critic_net, 0.2, 0.99, 9)
+    games_number = []
+    wins = []
     if order == 0:
         for index in range(total_batches):
             for crt in range(nets_number):
@@ -204,7 +213,7 @@ def instance(order):
         game([], [], agent, 1)
 instance(1)
 
-#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O3
+#gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainQTEST.c QAgent.c -o program -Wall -O9 -lm
 

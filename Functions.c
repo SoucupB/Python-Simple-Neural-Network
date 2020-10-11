@@ -43,6 +43,10 @@ int32_t func_TotalFunctions() {
     return 3;
 }
 
+void func_FreePointer(void *buffer) {
+    free(buffer);
+}
+
 long func_Time() {
     struct timespec _t;
     clock_gettime(CLOCK_REALTIME, &_t);

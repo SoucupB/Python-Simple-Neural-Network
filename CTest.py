@@ -36,6 +36,7 @@ class NeuralNetwork():
         response = self.fun.nn_FeedForward(self.neuralNet, input_array, len(input_array))
         arr = ctypes.c_float * 1
         list_of_results = self.buffer_to_list(response, self.input_array[len(self.input_array) - 1])
+        self.fun.func_FreePointer(response)
         return list_of_results
 
     def sgd(self, input, output):
