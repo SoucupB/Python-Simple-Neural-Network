@@ -4,6 +4,7 @@ Its very easy to use, (no external librarys needed, not even numpy, just the bui
 The C backend is using built in librarys like stdio, math etc... and a hashmap library from this repository.
 
 # Requirements
+
     python 3.x version!
 
     GCC (x86_64-posix-seh-rev0, Built by MinGW-W64 project) > 8.1.0 (It might work with other types of GCC aswell).
