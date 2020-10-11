@@ -12,20 +12,26 @@ Here is an example of TICTACTOE bot implemented with the help of this library an
 Before everything, the C library should be compiled with the command!
 
 # Compilation
+
     gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
+
 This will compile the C backend library for the python interface in order to make it work!
 To test it in C exclusively use this command!
+
     gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o application -Wall -O9 -lm
+
 Then run application in C only, run!
+
     ./application
 
 # Libs
 While a big lib is not necessary, to run the statistical builder you will need matplotlib for it in order to make it work.
 This lib can be optained with
+
     pip install matplotlib
 
 # Components
-This library is made from 2 important components.
+This library is made from 2 components.
 # Neural Network
 This is the component for the function aproximator used for aproximation of the Q table.
 It can also be used by other purpuses as well, for image recognition and other stuff!.
@@ -33,10 +39,12 @@ It can also be used by other purpuses as well, for image recognition and other s
 QAgent is the component used for a game agent, see tictacQLtest.py for the tictactoe example.
 
 # Examples
-Here is a graph that portrait the evolution of the Q agent against a random agent.
-The agent is played in 10 batches with 1000 games each!
+Here is a graph that portray the evolution of the Q agent against a random agent.
+The agent is playing 10 batches of 1000 games each!
 
 To run this example run
-python tictacQLtest.py
+
+    python tictacQLtest.py
+
 ![alt text](Plots/TicTacToe_wins.png)
 
