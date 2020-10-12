@@ -11,6 +11,7 @@ QAgent qa_Init(NeuralNetwork brain, float lr, float discount, int32_t numberOfAc
 }
 
 int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize) {
+    assert(self->brain->hiddensSizes[self->brain->numberOfHiddens] != 1);
     float maxQValue = -1e9;
     int32_t actionIndex = 0;
     int32_t prohibitedActionsCounters[MAX_STATE_SIZE] = {0};

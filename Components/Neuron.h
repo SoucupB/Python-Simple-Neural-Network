@@ -9,7 +9,7 @@ typedef struct Neuron_t *Neuron;
 struct Neuron_t {
     int32_t ID;
     Neuron *childs; // no more then 512 conections per nodes.
-    Neuron *parents;
+    Neuron *parents; // no more then 512 conections per nodes.
     int32_t childsCount;
     int32_t parentsCount;
     struct hashmap *hash;

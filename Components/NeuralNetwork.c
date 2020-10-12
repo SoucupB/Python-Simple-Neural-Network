@@ -18,10 +18,13 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
     neuralNetwork->dFunctions = dFunctions;
     int32_t ids = 0;
     Neuron *layer = malloc(sizeof(Neuron) * structureBuffer[0]);
+    Neuron *allNeurons = malloc(sizeof(Neuron) * (func_ArraySum(structureBuffer, size) + size - 1));
+    int32_t neuronsIndex = 0;
     neuralNetwork->biases = malloc(sizeof(struct Neuron_t) * size);
     for(int32_t j = 0; j < structureBuffer[0]; j++) {
         layer[j] = ne_Init(ids++, hash, NULL, NULL, neuralNetwork->lr);
         layer[j]->shouldApplyActivation = 0;
+        allNeurons[neuronsIndex++] = layer[j];
     }
     neuralNetwork->hiddensSizes[0] = structureBuffer[0];
     neuralNetwork->inputs = layer;
@@ -29,6 +32,7 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
         layer = malloc(sizeof(Neuron) * structureBuffer[i]);
         for(int32_t j = 0; j < structureBuffer[i]; j++) {
             layer[j] = ne_Init(ids++, hash, functions[configuration[i - 1]].func, dFunctions[configuration[i - 1]].func, neuralNetwork->lr);
+            allNeurons[neuronsIndex++] = layer[j];
         }
         neuralNetwork->hiddens[neuralNetwork->numberOfHiddens++] = layer;
         neuralNetwork->hiddensSizes[i] = structureBuffer[i];
@@ -47,6 +51,9 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
     }
     for(int32_t i = 0; i < neuralNetwork->numberOfHiddens; i++) {
         neuralNetwork->biases[i] = ne_Init(ids++, hash, functions[configuration[i]].func, dFunctions[configuration[i]].func, neuralNetwork->lr);
+        neuralNetwork->biases[i]->value = 1.0;
+        neuralNetwork->biases[i]->shouldApplyActivation = 0;
+        allNeurons[neuronsIndex++] = neuralNetwork->biases[i];
     }
     for(int32_t i = 0; i < neuralNetwork->numberOfHiddens; i++) {
         for(int32_t j = 0; j < neuralNetwork->hiddensSizes[i + 1]; j++) {
@@ -54,6 +61,7 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
         }
     }
     neuralNetwork->maxNeurons = ids;
+    neuralNetwork->allNeurons = allNeurons;
     return neuralNetwork;
 }
 
@@ -83,6 +91,30 @@ void nn_ClearNeurons(NeuralNetwork net) {
             net->hiddens[i][j]->error = 0;
             net->hiddens[i][j]->unChangedValue = 0;
         }
+    }
+}
+
+void nn_Mutate(NeuralNetwork self, float chance, float by) {
+    int32_t numberOfMutations = (int32_t)(chance * (float)self->maxNeurons) + 1.0;
+    assert(self->maxNeurons != 0);
+    for(int32_t i = 0; i < numberOfMutations; i++) {
+        int32_t fNode = (int32_t)func_RandomNumber(0, (float)(self->maxNeurons) - 0.001);
+        Neuron *nodes = NULL;
+        int32_t size = 0;
+        if(self->allNeurons[fNode]->parentsCount > 0) {
+            nodes = self->allNeurons[fNode]->parents;
+            size = self->allNeurons[fNode]->parentsCount;
+        }
+        else
+        if(self->allNeurons[fNode]->childsCount > 0) {
+            nodes = self->allNeurons[fNode]->childs;
+            size = self->allNeurons[fNode]->childsCount;
+        }
+
+        int32_t sNode = (int32_t)func_RandomNumber(0, (float)(size) - 0.001);
+        float weight = getWeight(self->hash, fNode, nodes[sNode]->ID);
+        float delta = func_Uniform(-by, by);
+        saveWeight(self->hash, fNode, nodes[sNode]->ID, weight + delta * weight);
     }
 }
 
@@ -158,18 +190,14 @@ float elementFromBuffer(float *buffer, int32_t index) {
 }
 
 void nn_Destroy(NeuralNetwork net) {
-    for(int32_t j = 0; j < net->hiddensSizes[0]; j++) {
-        ne_Destroy(net->inputs[j]);
-    }
-    for(int32_t i = 0; i < net->numberOfHiddens; i++) {
-        ne_Destroy(net->biases[i]);
-        for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
-            ne_Destroy(net->hiddens[i][j]);
-        }
-        free(net->hiddens[i]);
+    for(int32_t j = 0; j < net->maxNeurons; j++) {
+        ne_Destroy(net->allNeurons[j]);
     }
     free(net->hiddensSizes);
     free(net->biases);
     hashmap_free(net->hash);
+    free(net->allNeurons);
+    free(net->functions);
+    free(net->dFunctions);
     free(net);
 }

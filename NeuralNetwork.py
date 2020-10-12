@@ -4,6 +4,10 @@ import time
 SIGMOID = 0
 TANH = 1
 RELU = 2
+IDENTITY = 3
+SOFTPLUS = 4
+ARCTAN = 5
+GAUSSIAN = 6
 
 class NeuralNetwork():
     def __init__(self, input_array, lr, configuration):

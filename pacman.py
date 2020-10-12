@@ -1,6 +1,8 @@
 from random import choice
 from turtle import *
 from freegames import floor, vector
+import NeuralNetwork as nn
+from QAgent import QAgent
 
 state = {'score': 0}
 path = Turtle(visible=False)
@@ -35,6 +37,10 @@ tiles = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ]
+brain = nn.NeuralNetwork([len(tiles) + 4, 15, 1], 0.15, [nn.RELU, nn.SIGMOID])
+agent = QAgent(brain, 0.4, 0.99, 4)
+
+
 
 def square(x, y):
     "Draw square using path at (x, y)."
@@ -94,7 +100,6 @@ def move():
     writer.write(state['score'])
 
     clear()
-
     if valid(pacman + aim):
         pacman.move(aim)
 
@@ -106,6 +111,8 @@ def move():
         x = (index % 20) * 20 - 200
         y = 180 - (index // 20) * 20
         square(x, y)
+
+    frame_actions()
 
     up()
     goto(pacman.x + 10, pacman.y + 10)
@@ -137,8 +144,17 @@ def move():
 
     ontimer(move, 100)
 
+def frame_actions():
+    response = {0: [5, 0], 1: [-5, 0], 2: [0, 5], 3: [0, -5]}
+    action = agent.getBestAction(tiles, [])
+    if valid(pacman + vector(response[action][0], response[action][1])):
+        aim.x = response[action][0]
+        aim.y = response[action][1]
+
 def change(x, y):
     "Change pacman aim if valid."
+    response = {0: [5, 0], 1: [-5, 0], 2: [0, 5], 3: [0, -5]}
+    action = agent.getBestAction(tiles, [])
     if valid(pacman + vector(x, y)):
         aim.x = x
         aim.y = y
@@ -150,10 +166,10 @@ writer.goto(160, 160)
 writer.color('white')
 writer.write(state['score'])
 listen()
-onkey(lambda: change(5, 0), 'Right')
-onkey(lambda: change(-5, 0), 'Left')
-onkey(lambda: change(0, 5), 'Up')
-onkey(lambda: change(0, -5), 'Down')
+# onkey(lambda: change(5, 0), 'Right')
+# onkey(lambda: change(-5, 0), 'Left')
+# onkey(lambda: change(0, 5), 'Up')
+# onkey(lambda: change(0, -5), 'Down')
 world()
 move()
 done()

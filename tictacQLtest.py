@@ -1,4 +1,4 @@
-from NeuralNetwork import NeuralNetwork, SIGMOID, RELU, TANH
+import NeuralNetwork as nn
 from QAgent import QAgent
 import math
 import random
@@ -185,7 +185,10 @@ def batch_game(display, agent, t_batches, index):
         ind += 1
     if f == 0:
         print(index, t_batches)
-    print(index, ((d / 2 + s) / f))
+    if f != 0:
+        print(index, ((d / 2 + s) / f))
+    else:
+        print(t_batches)
     if f == 0:
         return t_batches
     return (s, f, d)
@@ -198,11 +201,11 @@ def plot(games, wins, draws):
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 350
+    total_batches = 400
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = NeuralNetwork([27, 27, 27, 1], 0.17, [RELU, RELU, SIGMOID])
-    agent = QAgent(critic_net, 0.2, 0.99, 9)
+    critic_net = nn.NeuralNetwork([27, 35, 1], 0.15, [nn.RELU, nn.SIGMOID])
+    agent = QAgent(critic_net, 0.4, 0.99, 9)
     games_number = []
     wins = []
     draws = []
@@ -217,7 +220,7 @@ def instance(order):
     else:
         critic_net.load_weights()
         game([], [], agent, 1)
-instance(0)
+instance(1)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm

@@ -3,16 +3,20 @@
 #include <time.h>
 #include <math.h>
 #include "Functions.h"
+#include <stdlib.h>
 
 int main() {
     // XOR problem!
     int32_t maxIterations = 70000;
     NeuralNetwork network;
-    int32_t inputs[] = {2, 2, 1};
+    int32_t inputs[] = {2, 4, 1};
     float input[5][5] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
     float output[5][5] = {{0}, {1}, {1}, {0}};
-    int32_t functionsIndex[] = {SIGMOID, SIGMOID};
+    int32_t functionsIndex[] = {RELU, SIGMOID};
     network = nn_InitMetaParameters(inputs, 3, 0.1, functionsIndex);
+    // for(int32_t i = 0; i < 100000; i++)
+    //     nn_Mutate(network, 0.1, 0.01);
+    // exit(0);
     printf("Started!\n");
     long mil = func_Time();
     for(int32_t i = 0; i < maxIterations; i++) {

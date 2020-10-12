@@ -7,6 +7,10 @@
 #define SIGMOID 0
 #define TANH 1
 #define RELU 2
+#define IDENTITY 3
+#define SOFTPLUS 4
+#define ARCTAN 5
+#define GAUSSIAN 6
 #define MIN_INTERVAR -0.1
 #define MAX_INTERVAR 0.1
 #define FILE_NAME "networks.rt"
@@ -19,6 +23,7 @@ struct NeuralNetwork_t
     Neuron *hiddens[1<<8];
     Neuron *biases;
     Neuron *inputs;
+    Neuron *allNeurons;
     int32_t *hiddensSizes;
     int32_t numberOfHiddens;
     float lr;
@@ -36,5 +41,7 @@ void nn_ClearNeurons(NeuralNetwork net);
 void nn_Destroy(NeuralNetwork net);
 void nn_WriteFile(NeuralNetwork net);
 void nn_LoadFile(NeuralNetwork network);
+void nn_CrossOver(NeuralNetwork first, NeuralNetwork second);
+void nn_Mutate(NeuralNetwork self, float chance, float by);
 
 float elementFromBuffer(float *buffer, int32_t index);
