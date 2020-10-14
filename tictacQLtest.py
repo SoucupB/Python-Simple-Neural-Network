@@ -105,16 +105,16 @@ def select_actor_action(game_map, distribution):
     return action_index
 
 
-def train_TD(total_states, actions, agent, reward):
-    agent.trainTemporalDifference(total_states, actions, reward)
+def train_TD(agent, reward):
+    agent.trainTemporalDifferenceExpReplay(reward)
 
 def train_QValues(total_states, actions, agent, reward):
     rew = [0] * len(total_states)
     rew[len(total_states) - 1] = reward
     agent.trainDeepQValue(total_states, actions, rew)
 
-def train(total_states, actions, agent, reward):
-    train_TD(total_states, actions, agent, reward)
+def train(agent, reward):
+    train_TD(agent, reward)
    # train_QValues(total_states, actions, agent, reward)
 
 def show_game(game_map):
@@ -124,7 +124,7 @@ def show_game(game_map):
         print()
     print(finish_state(game_map))
 
-def game(states, actions, states_x, actions_x, agent, agent_x, display):
+def game(agent, agent_x, display):
     game_map = [0] * 9
     f = 0
     s = 0
@@ -132,7 +132,6 @@ def game(states, actions, states_x, actions_x, agent, agent_x, display):
     while(finish_state(game_map) == 0):
         first_move = random_player(game_map, 1)
        # first_move = get_best_action(game_map, agent_x, 1, 1, 0.07)
-        save_map(bot_response(game_map), actions_x, states_x, first_move)
        # first_move = get_best_action(game_map, agent_x, 1)#random_player(game_map, 1)
        # bot_map = bot_response(game_map)
        # print(bot_map, agent.feed_forward(bot_map))
@@ -148,7 +147,6 @@ def game(states, actions, states_x, actions_x, agent, agent_x, display):
             return 0
         second_move = get_best_action(game_map, agent, 2, 0, 0.07)
        # second_move = random_player(game_map, 2)
-        save_map(bot_response(game_map), actions, states, second_move)
         if game_map[second_move] != 0:
             return 1
         game_map[second_move] = 2
@@ -176,23 +174,19 @@ def batch_game(display, agent, agent_x, t_batches, index):
     s = 0
     d = 0
     while ind < batches:
-        states = []
-        actions = []
-        states_x = []
-        actions_x = []
-        result = game(states, actions, states_x, actions_x, agent, agent_x, 0)
+        result = game(agent, agent_x, 0)
       #  agent.showReplay()
       #  exit()
         if result == 1:
-            train(states, actions, agent, 0)
+            train(agent, 0)
            # train(states_x, actions_x, agent_x, 1)
             f += 1
         if result == 2:
-            train(states, actions, agent, 1)
+            train(agent, 1)
          #   train(states_x, actions_x, agent_x, 0)
             s += 1
         if result == 0:
-            train(states, actions, agent, 0.5)
+            train(agent, 0.5)
            # train(states_x, actions_x, agent_x, 0.5)
             d += 1
         ind += 1
@@ -210,10 +204,10 @@ def plot(games, wins, draws):
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 50
+    total_batches = 500
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = nn.NeuralNetwork([27, 27, 27, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net = nn.NeuralNetwork([27, 35, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.RELU, nn.SIGMOID])
     critic_net_x = nn.NeuralNetwork([27, 61, 1], 0.11, [nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
     agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
@@ -230,7 +224,7 @@ def instance(order):
         critic_net.save_weights()
     else:
         critic_net.load_weights()
-        game([], [], [], [], agent, agent_x, 1)
+        game(agent, agent_x, 1)
 instance(0)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9

@@ -48,11 +48,13 @@ class QAgent():
         self.fun.qa_Destroy(self.qa)
 
     def trainTemporalDifference(self, buffer, actions_taken, reward):
-        # matrix_buffer = []
-        # for index in range(len(buffer)):
-        #     matrix_buffer.append(self.convert_to_float_pointer(buffer[index]))
-        # self.fun.qa_TrainTemporalDifference(self.qa, self.convert_float_array_pointer(matrix_buffer),
-        #                                     self.convert_to_int32_pointer(actions_taken), ctypes.c_float(reward), len(actions_taken))
+        matrix_buffer = []
+        for index in range(len(buffer)):
+            matrix_buffer.append(self.convert_to_float_pointer(buffer[index]))
+        self.fun.qa_TrainTemporalDifference(self.qa, self.convert_float_array_pointer(matrix_buffer),
+                                            self.convert_to_int32_pointer(actions_taken), ctypes.c_float(reward), len(actions_taken))
+
+    def trainTemporalDifferenceExpReplay(self, reward):
         self.fun.qa_TrainTemporalDifferenceReplay(self.qa, ctypes.c_float(reward))
 
     def showReplay(self):
