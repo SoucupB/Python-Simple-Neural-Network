@@ -69,6 +69,10 @@ float func_RandomNumber( float min, float max )
     return min + scale * ( max - min );      /* [min, max] */
 }
 
+void func_UseSrand() {
+    srand(time(NULL));
+}
+
 int32_t func_ArraySum(int32_t *buffer, int32_t size) {
     int32_t sum = 0;
     for(int32_t i = 0; i < size; i++) {
@@ -80,9 +84,10 @@ int32_t func_ArraySum(int32_t *buffer, int32_t size) {
 int32_t func_SelectFromProbabilities(float *buffer, int32_t size) { // this array should have values between [0, 1] and their sum should be equal to 1
     int32_t index = 0;
     float randomNumber = func_RandomNumber(0.0, 1.0);
-    while(randomNumber > 0.0) {
+    while(index < size && randomNumber >= 0.0) {
         randomNumber -= buffer[index++];
     }
+    assert(index <= size);
     return index - 1;
 }
 

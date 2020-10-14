@@ -1,5 +1,7 @@
 #include "QAgent.h"
 
+float getQValueFromState(QAgent self, float *state, int32_t action);
+
 QAgent qa_Init(NeuralNetwork brain, float lr, float discount, int32_t numberOfActions) {
     QAgent agent = malloc(sizeof(struct QAgent_t));
     agent->brain = brain;
@@ -7,11 +9,43 @@ QAgent qa_Init(NeuralNetwork brain, float lr, float discount, int32_t numberOfAc
     agent->discount = discount;
     agent->numberOfActions = numberOfActions;
     agent->stateSize = brain->hiddensSizes[0] - numberOfActions;
+    agent->replay = er_Init();
     return agent;
 }
 
+int32_t qa_RandomAction(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize) {
+    int32_t *actions = malloc(sizeof(int32_t) * self->stateSize);
+    int32_t maxActions = 0;
+    int32_t prohibitedActionsCounters[MAX_STATE_SIZE] = {0};
+    float stateActions[MAX_STATE_SIZE] = {0};
+    for(int32_t i = 0; i < prhSize; i++) {
+        prohibitedActionsCounters[prohibitedActions[i]] = 1;
+    }
+    for(int32_t i = 0; i < self->stateSize; i++) {
+        stateActions[i] = state[i];
+    }
+    for(int32_t i = 0; i < self->numberOfActions; i++) {
+        if(!prohibitedActionsCounters[i]) {
+            actions[maxActions++] = i;
+        }
+    }
+    int32_t actionsIndex = actions[rand() % maxActions];
+    float response[] = {getQValueFromState(self, state, actionsIndex)};
+    stateActions[actionsIndex + self->stateSize] = 1;
+    er_AddState(self->replay, stateActions, self->numberOfActions + self->stateSize, response, 1);
+    free(actions);
+    return actionsIndex;
+}
+
+int32_t qa_GetActionWithRandom(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize, float chance) {
+    if(func_RandomNumber(0.0, 1.0) < chance) {
+        return qa_RandomAction(self, state, prohibitedActions, prhSize);
+    }
+    return qa_GetChoosenActionIndex(self, state, prohibitedActions, prhSize);
+}
+
 int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize) {
-    assert(self->brain->hiddensSizes[self->brain->numberOfHiddens] != 1);
+    assert(self->brain->hiddensSizes[self->brain->numberOfHiddens] == 1);
     float maxQValue = -1e9;
     int32_t actionIndex = 0;
     int32_t prohibitedActionsCounters[MAX_STATE_SIZE] = {0};
@@ -35,7 +69,14 @@ int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedA
             stateMixedWithAction[i + self->stateSize] = 0;
         }
     }
+    float maxQValueVector[] = {maxQValue};
+    stateMixedWithAction[self->stateSize + actionIndex] = 1;
+    er_AddState(self->replay, stateMixedWithAction, self->numberOfActions + self->stateSize, maxQValueVector, 1);
     return actionIndex;
+}
+
+void qa_ShowExperienceReplay(QAgent agent) {
+    er_ShowStates(agent->replay);
 }
 
 float getQValueFromState(QAgent self, float *state, int32_t action) {
@@ -70,6 +111,24 @@ void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actio
     for(int32_t i = size - 1; i >= 0; i--) {
         optimizeQValue(self, inputBuffer[i], actionIndex[i], result[i]);
     }
+    free(result);
+}
+
+void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward) {
+    int32_t size = self->replay->bufferSize;
+    if(!size)
+        return ;
+    float *result = malloc(sizeof(float) * size);
+    result[size - 1] = endStateReward;
+    for(int32_t i = size - 2; i >= 0; i--) {
+        float qValue = er_GetValue(self->replay, i)[0];
+        result[i] = qValue + self->lr * (result[i + 1] - qValue);
+    }
+    for(int32_t i = size - 1; i >= 0; i--) {
+        float resultVector[] = {result[i]};
+        nn_Optimize(self->brain, er_GetState(self->replay, i), self->stateSize + self->numberOfActions, resultVector, 1);
+    }
+    er_Clean(self->replay);
     free(result);
 }
 
@@ -109,5 +168,6 @@ void qa_TrainDeepQNet(QAgent self, float **inputBuffer, int32_t *actionIndex, fl
 }
 
 void qa_Destroy(QAgent self) {
+    er_Destroy(self->replay);
     free(self);
 }

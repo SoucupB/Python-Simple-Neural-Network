@@ -4,7 +4,6 @@
 #include <time.h>
 
 NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, float lr, int32_t *configuration) {
-    srand(time(NULL));
     NeuralNetwork neuralNetwork = malloc(sizeof(struct NeuralNetwork_t));
     int32_t *hiddensSizes = malloc(sizeof(int32_t) * size);
     neuralNetwork->hiddensSizes = hiddensSizes;
@@ -110,11 +109,10 @@ void nn_Mutate(NeuralNetwork self, float chance, float by) {
             nodes = self->allNeurons[fNode]->childs;
             size = self->allNeurons[fNode]->childsCount;
         }
-
         int32_t sNode = (int32_t)func_RandomNumber(0, (float)(size) - 0.001);
         float weight = getWeight(self->hash, fNode, nodes[sNode]->ID);
-        float delta = func_Uniform(-by, by);
-        saveWeight(self->hash, fNode, nodes[sNode]->ID, weight + delta * weight);
+        float delta = func_RandomNumber(-by, by);
+        saveWeight(self->hash, fNode, nodes[sNode]->ID, weight + delta);
     }
 }
 
@@ -123,6 +121,8 @@ float *nn_FeedForward(NeuralNetwork net, float *structureBuffer, int32_t size) {
     nn_ClearNeurons(net);
     for(int32_t i = 0; i < size; i++) {
         net->inputs[i]->value = structureBuffer[i];
+        net->inputs[i]->unChangedValue = structureBuffer[i];
+        net->inputs[i]->error = 0;
         ne_FeedForward(net->inputs[i]);
     }
     for(int32_t i = 0; i < net->numberOfHiddens; i++) {

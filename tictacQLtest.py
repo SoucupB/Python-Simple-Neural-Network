@@ -124,13 +124,16 @@ def show_game(game_map):
         print()
     print(finish_state(game_map))
 
-def game(states, actions, agent, display):
+def game(states, actions, states_x, actions_x, agent, agent_x, display):
     game_map = [0] * 9
     f = 0
     s = 0
     d = 0
     while(finish_state(game_map) == 0):
         first_move = random_player(game_map, 1)
+       # first_move = get_best_action(game_map, agent_x, 1, 1, 0.07)
+        save_map(bot_response(game_map), actions_x, states_x, first_move)
+       # first_move = get_best_action(game_map, agent_x, 1)#random_player(game_map, 1)
        # bot_map = bot_response(game_map)
        # print(bot_map, agent.feed_forward(bot_map))
        # exit()
@@ -143,7 +146,8 @@ def game(states, actions, agent, display):
             return 1
         if draw(game_map) == 1:
             return 0
-        second_move = get_best_action(game_map, agent, 2)
+        second_move = get_best_action(game_map, agent, 2, 0, 0.07)
+       # second_move = random_player(game_map, 2)
         save_map(bot_response(game_map), actions, states, second_move)
         if game_map[second_move] != 0:
             return 1
@@ -156,14 +160,16 @@ def game(states, actions, agent, display):
             return 0
     return -1
 
-def get_best_action(game_map, bot, player):
+def get_best_action(game_map, bot, player, chanceflag, chance):
     prohibited_actions = []
     for index in range(len(game_map)):
         if game_map[index] != 0:
             prohibited_actions.append(index)
+    if chanceflag == 1:
+        return bot.getBestActionWithRandomChance(bot_response(game_map), prohibited_actions, chance)
     return bot.getBestAction(bot_response(game_map), prohibited_actions)
 
-def batch_game(display, agent, t_batches, index):
+def batch_game(display, agent, agent_x, t_batches, index):
     batches = t_batches
     ind = 0
     f = 0
@@ -172,46 +178,51 @@ def batch_game(display, agent, t_batches, index):
     while ind < batches:
         states = []
         actions = []
-        result = game(states, actions, agent, 0)
+        states_x = []
+        actions_x = []
+        result = game(states, actions, states_x, actions_x, agent, agent_x, 0)
+      #  agent.showReplay()
+      #  exit()
         if result == 1:
             train(states, actions, agent, 0)
+           # train(states_x, actions_x, agent_x, 1)
             f += 1
         if result == 2:
             train(states, actions, agent, 1)
+         #   train(states_x, actions_x, agent_x, 0)
             s += 1
         if result == 0:
             train(states, actions, agent, 0.5)
+           # train(states_x, actions_x, agent_x, 0.5)
             d += 1
         ind += 1
     if f == 0:
         print(index, t_batches)
     if f != 0:
         print(index, ((d / 2 + s) / f))
-    else:
-        print(t_batches)
-    if f == 0:
-        return t_batches
     return (s, f, d)
 
 def plot(games, wins, draws):
     plt.xlabel('batches!')
-    plt.ylabel('wins + draws of the Q agent (per 1000 matches!)')
-    plt.title("TicTacToe Deep Q Learning Agent vs random agent")
+    plt.ylabel('wins + draws of the "O" agent (per 1000 matches!)')
+    plt.title("TicTacToe Deep Q Learning Agent vs Deep Q Learning Agent")#random agent")
     plt.plot(games, wins)
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 400
+    total_batches = 50
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = nn.NeuralNetwork([27, 35, 1], 0.15, [nn.RELU, nn.SIGMOID])
+    critic_net = nn.NeuralNetwork([27, 27, 27, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net_x = nn.NeuralNetwork([27, 61, 1], 0.11, [nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
+    agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
     games_number = []
     wins = []
     draws = []
     if order == 0:
         for index in range(total_batches):
-            fitness = batch_game(0, agent, number_of_games_per_batch, index)
+            fitness = batch_game(0, agent, agent_x, number_of_games_per_batch, index)
             games_number.append((index + 1))
             wins.append(fitness[0] + fitness[2])
             draws.append(fitness[2])
@@ -219,8 +230,8 @@ def instance(order):
         critic_net.save_weights()
     else:
         critic_net.load_weights()
-        game([], [], agent, 1)
-instance(1)
+        game([], [], [], [], agent, agent_x, 1)
+instance(0)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm

@@ -7,7 +7,8 @@
 
 int main() {
     // XOR problem!
-    int32_t maxIterations = 70000;
+    func_UseSrand();
+    int32_t maxIterations = 400;
     NeuralNetwork network;
     int32_t inputs[] = {2, 4, 1};
     float input[5][5] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};

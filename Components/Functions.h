@@ -3,11 +3,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
+#include <assert.h>
 
 struct Function_t {
     float (*func)(float);
 };
 
+void func_UseSrand();
 float func_Sigmoid(float value);
 float func_DSigmoid(float value);
 float func_Uniform(float left, float right);

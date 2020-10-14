@@ -40,15 +40,23 @@ class QAgent():
     def getBestAction(self, state, prohibitedStates):
         return self.fun.qa_GetChoosenActionIndex(self.qa, self.convert_to_float_pointer(state), self.convert_to_int32_pointer(prohibitedStates), len(prohibitedStates))
 
+    def getBestActionWithRandomChance(self, state, prohibitedStates, chance):
+        return self.fun.qa_GetActionWithRandom(self.qa, self.convert_to_float_pointer(state),
+                                                self.convert_to_int32_pointer(prohibitedStates), len(prohibitedStates), ctypes.c_float(chance))
+
     def agentDestroy(self):
         self.fun.qa_Destroy(self.qa)
 
     def trainTemporalDifference(self, buffer, actions_taken, reward):
-        matrix_buffer = []
-        for index in range(len(buffer)):
-            matrix_buffer.append(self.convert_to_float_pointer(buffer[index]))
-        self.fun.qa_TrainTemporalDifference(self.qa, self.convert_float_array_pointer(matrix_buffer),
-                                            self.convert_to_int32_pointer(actions_taken), ctypes.c_float(reward), len(actions_taken))
+        # matrix_buffer = []
+        # for index in range(len(buffer)):
+        #     matrix_buffer.append(self.convert_to_float_pointer(buffer[index]))
+        # self.fun.qa_TrainTemporalDifference(self.qa, self.convert_float_array_pointer(matrix_buffer),
+        #                                     self.convert_to_int32_pointer(actions_taken), ctypes.c_float(reward), len(actions_taken))
+        self.fun.qa_TrainTemporalDifferenceReplay(self.qa, ctypes.c_float(reward))
+
+    def showReplay(self):
+        self.fun.qa_ShowExperienceReplay(self.qa)
 
     def trainDeepQValue(self, buffer, actions_taken, reward):
         matrix_buffer = []

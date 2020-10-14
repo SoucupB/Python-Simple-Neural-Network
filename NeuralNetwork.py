@@ -24,6 +24,7 @@ class NeuralNetwork():
         self.fun.elementFromBuffer.restype = ctypes.c_float
         self.fun.nn_Optimize.restype = ctypes.c_float
         self.fun.func_Uniform.restype = ctypes.c_float
+        self.fun.func_UseSrand()
 
     def show_weights(self):
         self.fun.nn_ShowWeights(self.neuralNet)
