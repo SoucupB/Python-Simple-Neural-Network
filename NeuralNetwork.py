@@ -20,12 +20,11 @@ class NeuralNetwork():
         raw_array = ints_array(*self.input_array)
         configuration_array = configuration_array(*self.configuration)
         c_lr = ctypes.c_float(self.lr)
+        self.fun.func_UseSrand()
         self.neuralNet = self.fun.nn_InitMetaParameters(raw_array, len(self.input_array), c_lr, configuration_array)
         self.fun.elementFromBuffer.restype = ctypes.c_float
         self.fun.nn_Optimize.restype = ctypes.c_float
         self.fun.func_Uniform.restype = ctypes.c_float
-        self.fun.func_UseSrand()
-
     def show_weights(self):
         self.fun.nn_ShowWeights(self.neuralNet)
 

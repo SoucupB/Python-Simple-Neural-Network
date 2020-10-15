@@ -2,8 +2,8 @@
 #include "NeuralNetwork.h"
 #include <stdlib.h>
 #include "ExperienceReplay.h"
-#define MAX_STATE_SIZE 1<<9
-#define MAX_ACTIONS_NUMBER 1<<9
+#define MAX_STATE_SIZE (1<<11)
+#define MAX_ACTIONS_NUMBER (1<<11)
 
 struct QAgent_t {
     NeuralNetwork brain;

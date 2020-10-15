@@ -9,12 +9,12 @@
 
 int main() {
     // XOR problem with neuroevolution!
-    int32_t maxIterations = 4000;
+    int32_t maxIterations = 60070;
     NeuroBatch batch;
     int32_t inputs[] = {2, 2, 1};
     float input[5][5] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
     float output[5][5] = {{0}, {1}, {1}, {0}};
-    int32_t maxNets = 20;
+    int32_t maxNets = 30;
     int32_t functionsIndex[] = {RELU, SIGMOID};
     // ExperienceReplay unit = er_Init();
     // float ana[] = {1, 0, 1}, response[] = {0};
@@ -35,14 +35,14 @@ int main() {
         for(int32_t k = 0; k < maxNets; k++) {
             float maxFitnesPerNet = 300;
             for(int32_t j = 0; j < 4; j++) {
-                float *netResponse = nn_FeedForward(batch->nets[k], input[j], batch->configuration[0]);
-                nn_Optimize(batch->nets[k], input[j], 2, output[j], 1);
+                float *netResponse = nb_NetworkResponse(batch, k, input[j], batch->configuration[0]);
+             //   nn_Optimize(batch->nets[k], input[j], 2, output[j], 1);
              //   printf("%f ", netResponse[0]);
                 maxFitnesPerNet -= fabs(output[j][0] - netResponse[0]) * 100;
                 free(netResponse);
             }
-          //  printf("Net %d has %.12f fitness!\n", k, maxFitnesPerNet);
-            nb_AssignFitness(batch, k, maxFitnesPerNet);
+            printf("Net %d has %.12f fitness!\n", k, maxFitnesPerNet);
+            nb_AssignFitness(batch, k, maxFitnesPerNet / 300.0);
         }
         nb_CreateNewGeneration(batch, 0.01, 0.005);
     }

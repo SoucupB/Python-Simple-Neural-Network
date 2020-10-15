@@ -2,7 +2,8 @@
 #include <stdlib.h>
 
 float func_Uniform(float left, float right) {
-    float randomNumber = sin((float)rand() * (float)rand() / (float)rand());
+    float augumentedNumber = (float)rand() + 1;
+    float randomNumber = sin((float)rand() * (float)rand() / augumentedNumber);
     return left + (right - left) * fabs(randomNumber);
 }
 
@@ -32,11 +33,11 @@ float func_DIdentity(float value) {
 }
 
 float func_Relu(float value) {
-    return value <= 0 ? 0 : value;
+    return value <= 0.0 ? 0.0 : value;
 }
 
 float func_DRelu(float value) {
-    return value <= 0 ? 0 : 1;
+    return value <= 0.0 ? 0.0 : 1.0;
 }
 
 float func_SoftPlus(float value) {

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "hashmap.h"
-#define MAX_CONNECTIONS 512
+#define MAX_CONNECTIONS 2048
 
 struct Neuron_t;
 typedef struct Neuron_t *Neuron;

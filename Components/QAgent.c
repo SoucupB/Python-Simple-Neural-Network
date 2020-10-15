@@ -17,7 +17,7 @@ int32_t qa_RandomAction(QAgent self, float *state, int32_t *prohibitedActions, i
     int32_t *actions = malloc(sizeof(int32_t) * self->stateSize);
     int32_t maxActions = 0;
     int32_t prohibitedActionsCounters[MAX_STATE_SIZE] = {0};
-    float stateActions[MAX_STATE_SIZE] = {0};
+    float stateActions[MAX_STATE_SIZE + MAX_ACTIONS_NUMBER] = {0};
     for(int32_t i = 0; i < prhSize; i++) {
         prohibitedActionsCounters[prohibitedActions[i]] = 1;
     }
@@ -49,7 +49,7 @@ int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedA
     float maxQValue = -1e9;
     int32_t actionIndex = 0;
     int32_t prohibitedActionsCounters[MAX_STATE_SIZE] = {0};
-    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
+    float stateMixedWithAction[MAX_ACTIONS_NUMBER + MAX_STATE_SIZE] = {0};
     for(int32_t i = 0; i < prhSize; i++) {
         prohibitedActionsCounters[prohibitedActions[i]] = 1;
     }
@@ -80,7 +80,7 @@ void qa_ShowExperienceReplay(QAgent agent) {
 }
 
 float getQValueFromState(QAgent self, float *state, int32_t action) {
-    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
+    float stateMixedWithAction[MAX_ACTIONS_NUMBER + MAX_STATE_SIZE] = {0};
     for(int32_t j = 0; j < self->stateSize; j++) {
         stateMixedWithAction[j] = state[j];
     }
@@ -92,7 +92,7 @@ float getQValueFromState(QAgent self, float *state, int32_t action) {
 }
 
 void optimizeQValue(QAgent self, float *state, int32_t action, float value) {
-    float stateMixedWithAction[MAX_ACTIONS_NUMBER] = {0};
+    float stateMixedWithAction[MAX_ACTIONS_NUMBER + MAX_STATE_SIZE] = {0};
     for(int32_t j = 0; j < self->stateSize; j++) {
         stateMixedWithAction[j] = state[j];
     }

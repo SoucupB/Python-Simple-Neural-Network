@@ -131,11 +131,7 @@ def game(agent, agent_x, display):
     d = 0
     while(finish_state(game_map) == 0):
         first_move = random_player(game_map, 1)
-       # first_move = get_best_action(game_map, agent_x, 1, 1, 0.07)
-       # first_move = get_best_action(game_map, agent_x, 1)#random_player(game_map, 1)
-       # bot_map = bot_response(game_map)
-       # print(bot_map, agent.feed_forward(bot_map))
-       # exit()
+        #first_move = get_best_action(game_map, agent_x, 1, 1, 0.07)
         if game_map[first_move] != 0:
             return 2
         game_map[first_move] = 1
@@ -145,7 +141,7 @@ def game(agent, agent_x, display):
             return 1
         if draw(game_map) == 1:
             return 0
-        second_move = get_best_action(game_map, agent, 2, 0, 0.07)
+        second_move = get_best_action(game_map, agent, 2, 1, 0.07)
        # second_move = random_player(game_map, 2)
         if game_map[second_move] != 0:
             return 1
@@ -179,15 +175,15 @@ def batch_game(display, agent, agent_x, t_batches, index):
       #  exit()
         if result == 1:
             train(agent, 0)
-           # train(states_x, actions_x, agent_x, 1)
+            train(agent_x, 1)
             f += 1
         if result == 2:
             train(agent, 1)
-         #   train(states_x, actions_x, agent_x, 0)
+            train(agent_x, 0)
             s += 1
         if result == 0:
             train(agent, 0.5)
-           # train(states_x, actions_x, agent_x, 0.5)
+            train(agent_x, 0.5)
             d += 1
         ind += 1
     if f == 0:
@@ -204,11 +200,11 @@ def plot(games, wins, draws):
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 500
+    total_batches = 250
     nets_number = 1
     number_of_games_per_batch = 1000
     critic_net = nn.NeuralNetwork([27, 35, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.RELU, nn.SIGMOID])
-    critic_net_x = nn.NeuralNetwork([27, 61, 1], 0.11, [nn.RELU, nn.SIGMOID])
+    critic_net_x = nn.NeuralNetwork([27, 35, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
     agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
     games_number = []
@@ -225,7 +221,7 @@ def instance(order):
     else:
         critic_net.load_weights()
         game(agent, agent_x, 1)
-instance(0)
+instance(1)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm
