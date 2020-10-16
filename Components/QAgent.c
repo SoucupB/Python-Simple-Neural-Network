@@ -98,7 +98,7 @@ void optimizeQValue(QAgent self, float *state, int32_t action, float value) {
     }
     float resultVector[] = {value};
     stateMixedWithAction[action + self->stateSize] = 1;
-    nn_Optimize(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions, resultVector, 1);
+    nn_Optimize(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions, resultVector, 1, OPT_SGD);
 }
 
 void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actionIndex, float endStateReward, int32_t size) {
@@ -114,7 +114,7 @@ void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actio
     free(result);
 }
 
-void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward) {
+void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward, int8_t type) {
     int32_t size = self->replay->bufferSize;
     if(!size)
         return ;
@@ -126,7 +126,7 @@ void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward) {
     }
     for(int32_t i = size - 1; i >= 0; i--) {
         float resultVector[] = {result[i]};
-        nn_Optimize(self->brain, er_GetState(self->replay, i), self->stateSize + self->numberOfActions, resultVector, 1);
+        nn_Optimize(self->brain, er_GetState(self->replay, i), self->stateSize + self->numberOfActions, resultVector, 1, type);
     }
     er_Clean(self->replay);
     free(result);

@@ -169,17 +169,17 @@ class Snake():
 #    # time.sleep(0.5)
 
 
-arb = nn.NeuralNetwork([2, 20, 20, 1], 0.001, [nn.SIGMOID, nn.SIGMOID, nn.RELU])
+arb = nn.NeuralNetwork([2, 5, 1], 0.1, [nn.RELU, nn.RELU])
 
 input = [[0, 0], [0, 1], [1, 0], [1, 1]]
-output = [[1], [3], [5], [2]]
+output = [[1], [3], [5], [6]]
 
-for i in range(100000):
+for i in range(6000):
     mike = [0, 1, 2, 3]
     random.shuffle(mike)
     for index in range(len(input)):
         #print(arb.feed_forward(input[index]))
-        print(arb.sgd(input[mike[index]], output[mike[index]]))
+        print(arb.sgd(input[mike[index]], output[mike[index]], nn.OPT_ADAGRAD))
 
 for index in range(len(input)):
     print(arb.feed_forward(input[index]))

@@ -15,6 +15,11 @@
 #define MAX_INTERVAR 0.1
 #define FILE_NAME "networks.rt"
 
+#define OPT_SGD 8
+#define OPT_SGDM 9
+#define OPT_SGDNM 10
+#define OPT_ADAGRAD 11
+
 struct NeuralNetwork_t;
 typedef struct NeuralNetwork_t* NeuralNetwork;
 
@@ -36,7 +41,7 @@ struct NeuralNetwork_t
 NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, float lr, int32_t *configuration);
 float *nn_FeedForward(NeuralNetwork net, float *structureBuffer, int32_t size);
 void nn_ShowWeights(NeuralNetwork net);
-float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *output, int32_t outputSize);
+float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *output, int32_t outputSize, int8_t type);
 void nn_ClearNeurons(NeuralNetwork net);
 void nn_Destroy(NeuralNetwork net);
 void nn_WriteFile(NeuralNetwork net);

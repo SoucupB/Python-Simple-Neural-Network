@@ -8,9 +8,9 @@
 int main() {
     // XOR problem!
     func_UseSrand();
-    int32_t maxIterations = 400;
+    int32_t maxIterations = 1408;
     NeuralNetwork network;
-    int32_t inputs[] = {2, 4, 1};
+    int32_t inputs[] = {2, 5, 1};
     float input[5][5] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}};
     float output[5][5] = {{0}, {1}, {1}, {0}};
     int32_t functionsIndex[] = {RELU, SIGMOID};
@@ -22,7 +22,7 @@ int main() {
     long mil = func_Time();
     for(int32_t i = 0; i < maxIterations; i++) {
         for(int32_t j = 0; j < 4; j++) {
-            nn_Optimize(network, input[j], 2, output[j], 1);
+            printf("%f\n", nn_Optimize(network, input[j], 2, output[j], 1, OPT_ADAGRAD));
         }
     }
     printf("Done in: %ld miliseconds\n", func_Time() - mil);

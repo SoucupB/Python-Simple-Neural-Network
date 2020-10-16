@@ -23,5 +23,5 @@ void qa_TrainDeepQNet(QAgent self, float **inputBuffer, int32_t *actionIndex, fl
 int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize);
 int32_t qa_GetActionWithRandom(QAgent self, float *state, int32_t *prohibitedActions, int32_t prhSize, float chance);
 void qa_ShowExperienceReplay(QAgent agent);
-void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward);
+void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward, int8_t type);
 void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actionIndex, float endStateReward, int32_t size);

@@ -1,10 +1,8 @@
 import ctypes
 import math
 import time
-from NeuralNetwork import NeuralNetwork, SIGMOID, TANH, RELU
-SIGMOID = 0
-TANH = 1
-RELU = 2
+# from NeuralNetwork import NeuralNetwork, SIGMOID, TANH, RELU
+import NeuralNetwork as nn
 
 class QAgent():
     def buffer_to_list(self, buffer, size):
@@ -54,8 +52,8 @@ class QAgent():
         self.fun.qa_TrainTemporalDifference(self.qa, self.convert_float_array_pointer(matrix_buffer),
                                             self.convert_to_int32_pointer(actions_taken), ctypes.c_float(reward), len(actions_taken))
 
-    def trainTemporalDifferenceExpReplay(self, reward):
-        self.fun.qa_TrainTemporalDifferenceReplay(self.qa, ctypes.c_float(reward))
+    def trainTemporalDifferenceExpReplay(self, reward, train_type=nn.OPT_SGD):
+        self.fun.qa_TrainTemporalDifferenceReplay(self.qa, ctypes.c_float(reward), ctypes.c_char(train_type))
 
     def showReplay(self):
         self.fun.qa_ShowExperienceReplay(self.qa)

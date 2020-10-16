@@ -106,7 +106,7 @@ def select_actor_action(game_map, distribution):
 
 
 def train_TD(agent, reward):
-    agent.trainTemporalDifferenceExpReplay(reward)
+    agent.trainTemporalDifferenceExpReplay(reward, nn.OPT_ADAGRAD)
 
 def train_QValues(total_states, actions, agent, reward):
     rew = [0] * len(total_states)
@@ -195,16 +195,16 @@ def batch_game(display, agent, agent_x, t_batches, index):
 def plot(games, wins, draws):
     plt.xlabel('batches!')
     plt.ylabel('wins + draws of the "O" agent (per 1000 matches!)')
-    plt.title("TicTacToe Deep Q Learning Agent vs Deep Q Learning Agent")#random agent")
+    plt.title("TicTacToe Deep Q Learning Agent vs random agent")
     plt.plot(games, wins)
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 250
+    total_batches = 70
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = nn.NeuralNetwork([27, 35, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.RELU, nn.SIGMOID])
-    critic_net_x = nn.NeuralNetwork([27, 35, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net = nn.NeuralNetwork([27, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net_x = nn.NeuralNetwork([27, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
     agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
     games_number = []
@@ -221,7 +221,7 @@ def instance(order):
     else:
         critic_net.load_weights()
         game(agent, agent_x, 1)
-instance(1)
+instance(0)
 
 #gcc -fPIC -shared NeuralNetwork.c hashmap.c Functions.c Neuron.c QAgent.c -Wall -o NeuralNetwork.so -O9
 #gcc NeuralNetwork.c hashmap.c Functions.c Neuron.c MainXOR.c QAgent.c -o program -O9 -lm

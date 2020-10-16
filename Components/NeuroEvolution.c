@@ -36,31 +36,12 @@ float *nb_NetworkResponse(NeuroBatch self, int32_t index, float *state, int32_t 
 
 void nb_CreateNewGeneration(NeuroBatch batch, float chance, float by) {
     float *percentFitness = func_NormalizeArray(batch->fitness, batch->numberOfNets);
-    // int32_t indexes[140] = {0};
-    // for(int32_t i = 0; i < batch->numberOfNets; i++) {
-    //     indexes[i] = i;
-    // }
-    // for(int32_t i = 0; i < batch->numberOfNets; i++) {
-    //     for(int32_t j = i + 1; j < batch->numberOfNets; j++) {
-    //         if(percentFitness[i] < percentFitness[j]) {
-    //             float aux = percentFitness[i];
-    //             percentFitness[i] = percentFitness[j];
-    //             percentFitness[j] = aux;
-    //             int32_t auxer = indexes[i];
-    //             indexes[i] = indexes[j];
-    //             indexes[j] = auxer;
-    //         }
-    //     }
-    // }
     NeuralNetwork *nets = malloc(sizeof(NeuralNetwork) * batch->numberOfNets);
     float *fitness = malloc(sizeof(float) * batch->numberOfNets);
     for(int32_t i = 0; i < batch->numberOfNets; i++) {
         int32_t netIndex = func_SelectFromProbabilities(percentFitness, batch->numberOfNets);
-     //   int32_t max_index = rand() % 8;
         nets[i] = batch->nets[netIndex];
         fitness[i] = batch->fitness[netIndex];
-        //nn_Mutate(nets[i], chance, by);
-        //nb_MutateGradientDescent(batch, netIndex, batch->fitness[netIndex]);
     }
     free(batch->nets);
     free(percentFitness);
@@ -87,10 +68,8 @@ void nb_MutateGradientDescent(NeuroBatch self, int32_t index, float fitness) {
         float *outputRandomTarget = malloc(sizeof(float) * outputSize);
         for(int32_t j = 0; j < outputSize; j++) {
             outputRandomTarget[j] = er_GetValue(self->replays[index], i)[j] + func_RandomNumber(-0.1, 0.1) * (1.0 - fitness) * (1.0 - fitness);
-            //printf("%f %f", er_GetValue(self->replays[index], i)[j], outputRandomTarget[j]);
         }
-       // exit(0);
-        nn_Optimize(self->nets[index], er_GetState(self->replays[index], i), self->nets[index]->hiddensSizes[0], outputRandomTarget, outputSize);
+        nn_Optimize(self->nets[index], er_GetState(self->replays[index], i), self->nets[index]->hiddensSizes[0], outputRandomTarget, outputSize, OPT_SGD);
         free(outputRandomTarget);
     }
     er_Clean(self->replays[index]);

@@ -9,6 +9,11 @@ SOFTPLUS = 4
 ARCTAN = 5
 GAUSSIAN = 6
 
+OPT_SGD = 8
+OPT_SGDM = 9
+OPT_SGDNM = 10
+OPT_ADAGRAD = 11
+
 class NeuralNetwork():
     def __init__(self, input_array, lr, configuration):
         self.fun = ctypes.CDLL("Components/NeuralNetwork.so")
@@ -43,13 +48,13 @@ class NeuralNetwork():
         self.fun.func_FreePointer(response)
         return list_of_results
 
-    def sgd(self, input, output):
+    def sgd(self, input, output, optimization_method=OPT_SGD):
         c_inputs = ctypes.c_float * len(input)
         input_array = c_inputs(*input)
 
         c_output = ctypes.c_float * len(output)
         output_array = c_output(*output)
-        return self.fun.nn_Optimize(self.neuralNet, input_array, len(input), output_array, len(output))
+        return self.fun.nn_Optimize(self.neuralNet, input_array, len(input), output_array, len(output), ctypes.c_char(optimization_method))
 
     def destroy_nn(self):
         self.fun.nn_Destroy(self.neuralNet)

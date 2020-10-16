@@ -137,8 +137,35 @@ float *nn_FeedForward(NeuralNetwork net, float *structureBuffer, int32_t size) {
     return result;
 }
 
-float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *output, int32_t outputSize) {
-    float *inputResponse = nn_FeedForward(net, input, inputSize);
+float *nesterovFeedForward(NeuralNetwork net, float *structureBuffer, int32_t size) {
+    float *result = malloc(sizeof(float) * size);
+    nn_ClearNeurons(net);
+    for(int32_t i = 0; i < size; i++) {
+        net->inputs[i]->value = structureBuffer[i];
+        net->inputs[i]->unChangedValue = structureBuffer[i];
+        net->inputs[i]->error = 0;
+        ne_NesterovFeedForward(net->inputs[i]);
+    }
+    for(int32_t i = 0; i < net->numberOfHiddens; i++) {
+        ne_NesterovFeedForward(net->biases[i]);
+        for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
+            ne_NesterovFeedForward(net->hiddens[i][j]);
+        }
+    }
+    for(int32_t i = 0; i < net->hiddensSizes[net->numberOfHiddens]; i++) {
+        result[i] = net->hiddens[net->numberOfHiddens - 1][i]->value;
+    }
+    return result;
+}
+
+float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *output, int32_t outputSize, int8_t type) {
+    float *inputResponse = NULL;
+    if(type == OPT_SGDNM) {
+        inputResponse = nesterovFeedForward(net, input, inputSize);
+    }
+    else {
+        inputResponse = nn_FeedForward(net, input, inputSize);
+    }
     float totalError = 0;
     for(int32_t i = 0; i < outputSize; i++) {
         float valueError = func_SquaredError(output[i], inputResponse[i]);
@@ -150,9 +177,25 @@ float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *out
             ne_PropagateErrorToParents(net->hiddens[i][j]);
         }
     }
-    for(int32_t i = net->numberOfHiddens - 1; i >= 0; i--) {
-        for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
-            ne_OptimizeSGD(net->hiddens[i][j]);
+    if(type == OPT_SGD) {
+        for(int32_t i = net->numberOfHiddens - 1; i >= 0; i--) {
+            for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
+                ne_OptimizeSGD(net->hiddens[i][j]);
+            }
+        }
+    }
+    if(type == OPT_SGDM || type == OPT_SGDNM) {
+        for(int32_t i = net->numberOfHiddens - 1; i >= 0; i--) {
+            for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
+                ne_OptimizeSgdMomentum(net->hiddens[i][j]);
+            }
+        }
+    }
+    if(type == OPT_ADAGRAD) {
+        for(int32_t i = net->numberOfHiddens - 1; i >= 0; i--) {
+            for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
+                ne_OptimizeAdagrad(net->hiddens[i][j]);
+            }
         }
     }
     free(inputResponse);

@@ -1,6 +1,7 @@
 #include "Neuron.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 Neuron ne_Init(int32_t ID, struct hashmap *hash,
                float (*activationFunction)(float), float (*derivativeActivationFunction)(float), float lr) {
@@ -22,6 +23,9 @@ Neuron ne_Init(int32_t ID, struct hashmap *hash,
     neuron->activationFunction = activationFunction;
     neuron->derivativeActivationFunction = derivativeActivationFunction;
     neuron->lr = lr;
+    neuron->pastGradient = 0;
+    neuron->epsilon = 1e-5;
+    neuron->beta = 0.9;
     return neuron;
 }
 
@@ -66,5 +70,50 @@ void ne_OptimizeSGD(Neuron self) {
                          self->error * self->lr * self->derivativeActivationFunction(self->unChangedValue) * parent->value;
         saveWeight(parent->hash, self->ID, parent->ID, gradient);
         saveWeight(parent->hash, parent->ID, self->ID, gradient);
+    }
+}
+
+void ne_OptimizeAdagrad(Neuron self) {
+    for(int32_t i = 0; i < self->parentsCount; i++) {
+        Neuron parent = self->parents[i];
+        float gradient = self->error * self->derivativeActivationFunction(self->unChangedValue) * parent->value;
+        self->pastGradient += gradient * gradient;
+        float lastWeight = getWeight(parent->hash, parent->ID, self->ID);
+        lastWeight = lastWeight + self->lr / (sqrt(self->pastGradient + self->epsilon)) * gradient;
+        saveWeight(parent->hash, self->ID, parent->ID, lastWeight);
+        saveWeight(parent->hash, parent->ID, self->ID, lastWeight);
+    }
+}
+
+void ne_OptimizeSgdMomentum(Neuron self) {
+    for(int32_t i = 0; i < self->parentsCount; i++) {
+        Neuron parent = self->parents[i];
+        float lastWeight = getWeight(parent->hash, parent->ID, self->ID);
+        float gradient = self->derivativeActivationFunction(self->unChangedValue) * parent->value * self->error;
+        self->pastGradient = self->beta * self->pastGradient + self->lr * gradient;
+        saveWeight(parent->hash, self->ID, parent->ID, lastWeight + self->pastGradient);
+        saveWeight(parent->hash, parent->ID, self->ID, lastWeight + self->pastGradient);
+    }
+}
+
+void ne_OptimizeSgdNesterovMomentum(Neuron self) {
+    for(int32_t i = 0; i < self->parentsCount; i++) {
+        Neuron parent = self->parents[i];
+        float lastWeight = getWeight(parent->hash, parent->ID, self->ID);
+        float gradient = self->derivativeActivationFunction(self->unChangedValue) * parent->value * self->error;
+        self->pastGradient = self->beta * self->pastGradient + self->lr * gradient;
+        saveWeight(parent->hash, self->ID, parent->ID, lastWeight + self->pastGradient);
+        saveWeight(parent->hash, parent->ID, self->ID, lastWeight + self->pastGradient);
+    }
+}
+
+void ne_NesterovFeedForward(Neuron self) {
+    if(self->shouldApplyActivation) {
+        ne_Activate(self);
+    }
+    for(int32_t i = 0; i < self->childsCount; i++) {
+        Neuron child = self->childs[i];
+        child->value += self->value * (getWeight(self->hash, self->ID, child->ID) - self->beta * self->pastGradient);
+        child->unChangedValue = child->value;
     }
 }

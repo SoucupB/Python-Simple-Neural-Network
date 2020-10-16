@@ -20,6 +20,9 @@ struct Neuron_t {
     float (*activationFunction)(float);
     float (*derivativeActivationFunction)(float);
     float lr;
+    float pastGradient;
+    float epsilon;
+    float beta;
 };
 
 Neuron ne_Init(int32_t ID, struct hashmap *hash, float (*activationFunction)(float), float (*derivativeActivationFunction)(float), float lr);
@@ -30,3 +33,7 @@ void ne_OptimizeSGD(Neuron neuron);
 void ne_Activate(Neuron neuron);
 void ne_PropagateErrorToParents(Neuron neuron);
 void ne_Destroy(Neuron neuron);
+void ne_OptimizeSgdMomentum(Neuron self);
+void ne_OptimizeSgdNesterovMomentum(Neuron self);
+void ne_NesterovFeedForward(Neuron self);
+void ne_OptimizeAdagrad(Neuron self);
