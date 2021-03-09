@@ -316,10 +316,10 @@ void nn_WriteFile(NeuralNetwork net, char *fileName) {
 int32_t nn_GetProportionalRandomIndex(NeuralNetwork net, float *input) {
     float *response = nn_FeedForward(net, input);
     float sum = 0.0f;
-    for(int32_t i = 0; i < net->hdSize; i++) {
+    for(int32_t i = 0; i < net->structureBuffer[net->hdSize - 1]; i++) {
         sum += response[i];
     }
-    for(int32_t i = 0; i < net->hdSize; i++) {
+    for(int32_t i = 0; i < net->structureBuffer[net->hdSize - 1]; i++) {
         response[i] /= sum;
     }
     float randomNumber = func_RandomNumber(0.0f, 1.0f);
