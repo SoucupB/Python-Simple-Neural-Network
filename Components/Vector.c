@@ -5,7 +5,7 @@
 
 Vector vct_Init(size_t size) {
   Vector self = nmalloc(sizeof(struct Vector_t));
-  self->buffer = malloc(size);
+  self->buffer = nmalloc(size);
   self->size = 0;
   self->capacity = 1;
   self->objSize = size;

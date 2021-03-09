@@ -59,7 +59,7 @@ void stat_Init(void *pointer, size_t totalMemory) {
   void *stats = malloc(totalMemory);
   void *staticMemory = (char *)pointer - sizeof(void *);
   memcpy(staticMemory, &stats, sizeof(void *));
-  segmentMemory = malloc(totalMemory);
+  segmentMemory = stats;
 }
 
 void stat_Switch(void *pointer) {
@@ -77,7 +77,7 @@ void stat_Free(void *buffer) {
 }
 
 void *nrealloc(void *buffer, size_t previousSize, size_t size) {
-  void *newBuffer = nmalloc(sizeof(void *) * size);
+  void *newBuffer = nmalloc(size);
   memcpy(newBuffer, buffer, previousSize);
   return newBuffer;
 }

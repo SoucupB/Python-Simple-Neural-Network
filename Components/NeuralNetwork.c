@@ -45,7 +45,7 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
     neuralNetwork->dFunctions = dFunctions;
     neuralNetwork->train = 0;
     int32_t ids = 0;
-    stat_Init(neuralNetwork, structureBuffer[size - 1]);
+    stat_Init(neuralNetwork, structureBuffer[size - 1] * sizeof(float));
     Neuron *layer = nmalloc(sizeof(Neuron) * structureBuffer[0]);
     Neuron *allNeurons = nmalloc(sizeof(Neuron) * (func_ArraySum(structureBuffer, size) + size - 1));
     int32_t neuronsIndex = 0;
@@ -128,21 +128,6 @@ void showDataMatrix(NeuralNetwork net) {
 
 void nn_ShowWeights(NeuralNetwork net) {
     assert(net->numberOfHiddens > 0);
-    // for(int32_t i = 0; i < net->hiddensSizes[0]; i++) {
-    //     for(int32_t j = 0; j < net->hiddensSizes[1]; j++) {
-    //         printf("%f ", getWeight(net->hash, net->inputs[i]->ID, net->hiddens[0][j]->ID));
-    //     }
-    //     printf("\n");
-    // }
-    // printf("\n");
-    // for(int32_t i = 0; i < net->numberOfHiddens - 1; i++) {
-    //     for(int32_t j = 0; j < net->hiddensSizes[i + 1]; j++) {
-    //         for(int32_t k = 0; k < net->hiddensSizes[i + 2]; k++) {
-    //             printf("%f ", getWeight(net->hash, net->hiddens[i][j]->ID, net->hiddens[i + 1][k]->ID));
-    //         }
-    //         printf("\n");
-    //     }
-    // }
 }
 
 void nn_ClearNeurons(NeuralNetwork net) {

@@ -203,7 +203,7 @@ def instance(order):
     total_batches = 700
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = nn.NeuralNetwork([27, 15, 15, 1], 0.13, [nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net = nn.NeuralNetwork([27, 35, 1], 0.13, [nn.RELU, nn.SIGMOID])
     critic_net_x = nn.NeuralNetwork([27, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
     agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
