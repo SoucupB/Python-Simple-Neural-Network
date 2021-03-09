@@ -1,7 +1,7 @@
 # Python-Simple-Neural-Network
 It is a NeuralNetwork library build with a C backend, great for classification problems and it has some reinforcement learning agents good for games (examples below).
 Its very easy to use, (no external librarys needed, not even numpy, just the build in 'math' and 'random' for python).
-The C backend is using built in librarys like stdio, math etc... and nothing more.
+The C backend is using built in librarys like stdio, math, etc....
 
 # Requirements
 
