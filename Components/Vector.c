@@ -20,7 +20,7 @@ void copyData(Vector self, void *buffer) {
 void vct_Push(Vector self, void *buffer) {
   if(self->size >= self->capacity) {
     self->capacity <<= 1;
-    self->buffer = nrealloc(self->buffer, self->capacity * self->objSize);
+    self->buffer = nrealloc(self->buffer, self->size * self->objSize, self->capacity * self->objSize);
   }
   copyData(self, buffer);
 }

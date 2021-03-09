@@ -76,9 +76,9 @@ void stat_Free(void *buffer) {
   allocationsCount--;
 }
 
-void *nrealloc(void *buffer, size_t size) {
+void *nrealloc(void *buffer, size_t previousSize, size_t size) {
   void *newBuffer = nmalloc(sizeof(void *) * size);
-  memcpy(newBuffer, buffer, size);
+  memcpy(newBuffer, buffer, previousSize);
   return newBuffer;
 }
 
