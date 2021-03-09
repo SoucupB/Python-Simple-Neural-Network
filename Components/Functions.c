@@ -1,5 +1,6 @@
 #include "Functions.h"
 #include <stdlib.h>
+#include "StaticAllocator.h"
 
 float func_Uniform(float left, float right) {
     float augumentedNumber = (float)rand() + 1;
@@ -94,7 +95,7 @@ int32_t func_SelectFromProbabilities(float *buffer, int32_t size) { // this arra
 
 float *func_NormalizeArray(float *buffer, int32_t size) {
     float sumTotal = 0;
-    float *normalizedArray = malloc(sizeof(float) * size);
+    float *normalizedArray = nmalloc(sizeof(float) * size);
     for(int32_t i = 0; i < size; i++) {
         sumTotal += buffer[i];
     }
@@ -108,6 +109,10 @@ float func_SquaredError(float a, float b) {
     return (a < b ? (a - b) * (a - b) * -1 : (a - b) * (a - b));
 }
 
+int32_t smin(int32_t a, int32_t b) {
+    return (a < b ? a : b);
+}
+
 float func_CrossEntropy(float a, float b) {
     return -(a * log(b + 1e-5) + (1 - a) * log(1 - b + 1e-5));
 }
@@ -116,8 +121,8 @@ int32_t func_TotalFunctions() {
     return 7;
 }
 
-void func_FreePointer(void *buffer) {
-    free(buffer);
+void func_freePointer(void *buffer) {
+    nfree(buffer);
 }
 
 long func_Time() {
@@ -127,7 +132,7 @@ long func_Time() {
 }
 
 struct Function_t *func_GetActivationFunctions() {
-    struct Function_t *functions = malloc(sizeof(struct Function_t) * func_TotalFunctions());
+    struct Function_t *functions = nmalloc(sizeof(struct Function_t) * func_TotalFunctions());
     functions[0].func = func_Sigmoid;
     functions[1].func = func_Tanh;
     functions[2].func = func_Relu;
@@ -138,7 +143,7 @@ struct Function_t *func_GetActivationFunctions() {
     return functions;
 }
 struct Function_t *func_GetDActivationFunctions() {
-    struct Function_t *functions = malloc(sizeof(struct Function_t) * func_TotalFunctions());
+    struct Function_t *functions = nmalloc(sizeof(struct Function_t) * func_TotalFunctions());
     functions[0].func = func_DSigmoid;
     functions[1].func = func_DTanh;
     functions[2].func = func_DRelu;

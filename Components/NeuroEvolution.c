@@ -28,7 +28,7 @@ NeuralNetwork nb_GetNet(NeuroBatch batch, int32_t index) {
 }
 
 float *nb_NetworkResponse(NeuroBatch self, int32_t index, float *state, int32_t size) {
-    float *net_Response = nn_FeedForward(self->nets[index], state, size);
+    float *net_Response = nn_FeedForward(self->nets[index], state);
     int32_t netsSizes = self->nets[index]->hiddensSizes[self->nets[index]->numberOfHiddens];
     er_AddState(self->replays[index], state, size, net_Response, netsSizes);
     return net_Response;
@@ -69,7 +69,7 @@ void nb_MutateGradientDescent(NeuroBatch self, int32_t index, float fitness) {
         for(int32_t j = 0; j < outputSize; j++) {
             outputRandomTarget[j] = er_GetValue(self->replays[index], i)[j] + func_RandomNumber(-0.1, 0.1) * (1.0 - fitness) * (1.0 - fitness);
         }
-        nn_Optimize(self->nets[index], er_GetState(self->replays[index], i), self->nets[index]->hiddensSizes[0], outputRandomTarget, outputSize, OPT_SGD);
+        nn_Optimize(self->nets[index], er_GetState(self->replays[index], i), outputRandomTarget, OPT_SGD);
         free(outputRandomTarget);
     }
     er_Clean(self->replays[index]);

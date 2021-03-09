@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
 #include "Neuron.h"
-#include "hashmap.h"
 #include <assert.h>
 #include "Functions.h"
 #define SIGMOID 0
@@ -20,11 +19,14 @@
 #define OPT_SGDNM 10
 #define OPT_ADAGRAD 11
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct NeuralNetwork_t;
 typedef struct NeuralNetwork_t* NeuralNetwork;
 
-struct NeuralNetwork_t
-{
+struct NeuralNetwork_t {
     Neuron *hiddens[1<<8];
     Neuron *biases;
     Neuron *inputs;
@@ -32,21 +34,30 @@ struct NeuralNetwork_t
     int32_t *hiddensSizes;
     int32_t numberOfHiddens;
     float lr;
-    struct hashmap *hash;
     struct Function_t *functions;
     struct Function_t *dFunctions;
     int32_t maxNeurons;
+    uint8_t train;
+    int32_t hdSize;
+    int32_t *structureBuffer;
+    float ***matrixes;
+    int32_t **prtStruct;
 };
 
+
 NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, float lr, int32_t *configuration);
-float *nn_FeedForward(NeuralNetwork net, float *structureBuffer, int32_t size);
+float *nn_FeedForward(NeuralNetwork net, float *structureBuffer);
 void nn_ShowWeights(NeuralNetwork net);
-float nn_Optimize(NeuralNetwork net, float *input, int32_t inputSize, float *output, int32_t outputSize, int8_t type);
+float nn_Optimize(NeuralNetwork net, float *input, float *output, int8_t type);
 void nn_ClearNeurons(NeuralNetwork net);
 void nn_Destroy(NeuralNetwork net);
-void nn_WriteFile(NeuralNetwork net);
-void nn_LoadFile(NeuralNetwork network);
+void nn_WriteFile(NeuralNetwork net, char *fileName);
+void nn_LoadFile(NeuralNetwork network, char *fileNanme);
 void nn_CrossOver(NeuralNetwork first, NeuralNetwork second);
 void nn_Mutate(NeuralNetwork self, float chance, float by);
-
 float elementFromBuffer(float *buffer, int32_t index);
+int32_t nn_GetProportionalRandomIndex(NeuralNetwork net, float *input);
+
+#ifdef __cplusplus
+}
+#endif

@@ -56,11 +56,10 @@ int32_t qa_GetChoosenActionIndex(QAgent self, float *state, int32_t *prohibitedA
     for(int32_t i = 0; i < self->stateSize; i++) {
         stateMixedWithAction[i] = state[i];
     }
-    int32_t inputSize = self->numberOfActions + self->stateSize;
     for(int32_t i = 0; i < self->numberOfActions; i++) {
         if(!prohibitedActionsCounters[i]) {
             stateMixedWithAction[i + self->stateSize] = 1;
-            float *currentQValue = nn_FeedForward(self->brain, stateMixedWithAction, inputSize);
+            float *currentQValue = nn_FeedForward(self->brain, stateMixedWithAction);
             if(currentQValue[0] > maxQValue) {
                 maxQValue = currentQValue[0];
                 actionIndex = i;
@@ -85,7 +84,7 @@ float getQValueFromState(QAgent self, float *state, int32_t action) {
         stateMixedWithAction[j] = state[j];
     }
     stateMixedWithAction[action + self->stateSize] = 1;
-    float *qValueBuffer = nn_FeedForward(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions);
+    float *qValueBuffer = nn_FeedForward(self->brain, stateMixedWithAction);
     float qValue = qValueBuffer[0];
     free(qValueBuffer);
     return qValue;
@@ -98,7 +97,7 @@ void optimizeQValue(QAgent self, float *state, int32_t action, float value) {
     }
     float resultVector[] = {value};
     stateMixedWithAction[action + self->stateSize] = 1;
-    nn_Optimize(self->brain, stateMixedWithAction, self->stateSize + self->numberOfActions, resultVector, 1, OPT_SGD);
+    nn_Optimize(self->brain, stateMixedWithAction, resultVector, OPT_SGD);
 }
 
 void qa_TrainTemporalDifference(QAgent self, float **inputBuffer, int32_t *actionIndex, float endStateReward, int32_t size) {
@@ -126,7 +125,7 @@ void qa_TrainTemporalDifferenceReplay(QAgent self, float endStateReward, int8_t 
     }
     for(int32_t i = size - 1; i >= 0; i--) {
         float resultVector[] = {result[i]};
-        nn_Optimize(self->brain, er_GetState(self->replay, i), self->stateSize + self->numberOfActions, resultVector, 1, type);
+        nn_Optimize(self->brain, er_GetState(self->replay, i), resultVector, type);
     }
     er_Clean(self->replay);
     free(result);

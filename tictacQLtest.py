@@ -73,9 +73,9 @@ def random_player(game_map, player):
     return random.choice(response)
 
 def bot_response(game_map):
-    f = [1, 0]
-    s = [0, 1]
-    l = [0, 0]
+    f = [1, 0, 0]
+    s = [0, 1, 0]
+    l = [0, 0, 1]
     bot_map = []
     for index in range(9):
         if game_map[index] == 1:
@@ -106,7 +106,7 @@ def select_actor_action(game_map, distribution):
 
 
 def train_TD(agent, reward):
-    agent.trainTemporalDifferenceExpReplay(reward, nn.OPT_ADAGRAD)
+    agent.trainTemporalDifferenceExpReplay(reward, nn.OPT_SGD)
 
 def train_QValues(total_states, actions, agent, reward):
     rew = [0] * len(total_states)
@@ -142,7 +142,7 @@ def game(agent, agent_x, display):
         if draw(game_map) == 1:
             return 0
         second_move = get_best_action(game_map, agent, 2, 1, 0.07)
-       # second_move = random_player(game_map, 2)
+        #second_move = random_player(game_map, 2)
         if game_map[second_move] != 0:
             return 1
         game_map[second_move] = 2
@@ -200,10 +200,10 @@ def plot(games, wins, draws):
     plt.savefig("Plots/TicTacToe_wins.png")
     return 0
 def instance(order):
-    total_batches = 70
+    total_batches = 700
     nets_number = 1
     number_of_games_per_batch = 1000
-    critic_net = nn.NeuralNetwork([27, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
+    critic_net = nn.NeuralNetwork([27, 15, 15, 1], 0.13, [nn.RELU, nn.RELU, nn.SIGMOID])
     critic_net_x = nn.NeuralNetwork([27, 35, 35, 1], 0.11, [nn.RELU, nn.RELU, nn.SIGMOID])
     agent = QAgent(critic_net, 0.4, 0.99, 9)
     agent_x = QAgent(critic_net_x, 0.4, 0.99, 9)
@@ -217,9 +217,9 @@ def instance(order):
             wins.append(fitness[0] + fitness[2])
             draws.append(fitness[2])
         plot(games_number, wins, draws)
-        critic_net.save_weights()
+        critic_net.save_weights("netValues.rt")
     else:
-        critic_net.load_weights()
+        critic_net.load_weights("netValues.rt")
         game(agent, agent_x, 1)
 instance(0)
 

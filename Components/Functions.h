@@ -5,6 +5,10 @@
 #include <time.h>
 #include <assert.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct Function_t {
     float (*func)(float);
 };
@@ -24,3 +28,8 @@ int32_t func_SelectFromProbabilities(float *buffer, int32_t size);
 float *func_NormalizeArray(float *buffer, int32_t size);
 int32_t func_ArraySum(int32_t *buffer, int32_t size);
 float func_RandomNumber(float min, float max);
+int32_t smin(int32_t a, int32_t b);
+
+#ifdef __cplusplus
+}
+#endif

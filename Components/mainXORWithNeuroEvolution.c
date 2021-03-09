@@ -36,7 +36,7 @@ int main() {
             float maxFitnesPerNet = 300;
             for(int32_t j = 0; j < 4; j++) {
                 float *netResponse = nb_NetworkResponse(batch, k, input[j], batch->configuration[0]);
-             //   nn_Optimize(batch->nets[k], input[j], 2, output[j], 1);
+             //   nn_Optimize(batch->nets[k], input[j], output[j]);
              //   printf("%f ", netResponse[0]);
                 maxFitnesPerNet -= fabs(output[j][0] - netResponse[0]) * 100;
                 free(netResponse);
@@ -49,7 +49,7 @@ int main() {
     printf("Done in: %ld miliseconds\n", func_Time() - mil);
     printf("Responses:\n");
     for(int32_t j = 0; j < 4; j++) {
-        float *response = nn_FeedForward(batch->nets[0], input[j], 2);
+        float *response = nn_FeedForward(batch->nets[0], input[j]);
         printf("Response for inputs [%.1f, %.1f] is %f\n", input[j][0], input[j][1], response[0]);
     }
     nb_Destroy(batch);

@@ -42,7 +42,7 @@ class NeuralNetwork():
     def feed_forward(self, inputs):
         c_inputs = ctypes.c_float * len(inputs)
         input_array = c_inputs(*inputs)
-        response = self.fun.nn_FeedForward(self.neuralNet, input_array, len(input_array))
+        response = self.fun.nn_FeedForward(self.neuralNet, input_array)
         arr = ctypes.c_float * 1
         list_of_results = self.buffer_to_list(response, self.input_array[len(self.input_array) - 1])
         self.fun.func_FreePointer(response)
@@ -54,16 +54,16 @@ class NeuralNetwork():
 
         c_output = ctypes.c_float * len(output)
         output_array = c_output(*output)
-        return self.fun.nn_Optimize(self.neuralNet, input_array, len(input), output_array, len(output), ctypes.c_char(optimization_method))
+        return self.fun.nn_Optimize(self.neuralNet, input_array, output_array, ctypes.c_char(optimization_method))
 
     def destroy_nn(self):
         self.fun.nn_Destroy(self.neuralNet)
 
-    def save_weights(self):
-        self.fun.nn_WriteFile(self.neuralNet)
+    def save_weights(self, fileName):
+        self.fun.nn_WriteFile(self.neuralNet, fileName.encode('utf-8'))
 
-    def load_weights(self):
-        self.fun.nn_LoadFile(self.neuralNet)
+    def load_weights(self, fileName):
+        self.fun.nn_LoadFile(self.neuralNet, fileName.encode('utf-8'))
 
     def get_random(self, a, b):
         return self.fun.func_Uniform(ctypes.c_float(a), ctypes.c_float(b))
