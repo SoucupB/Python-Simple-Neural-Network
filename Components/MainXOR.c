@@ -15,9 +15,6 @@ int main() {
     float output[5][5] = {{0}, {1}, {1}, {0}};
     int32_t functionsIndex[] = {RELU, SIGMOID};
     network = nn_InitMetaParameters(inputs, 3, 0.1, functionsIndex);
-    // for(int32_t i = 0; i < 100000; i++)
-    //     nn_Mutate(network, 0.1, 0.01);
-    // exit(0);
     printf("Started!\n");
     long mil = func_Time();
     for(int32_t i = 0; i < maxIterations; i++) {
@@ -31,6 +28,7 @@ int main() {
         float *response = nn_FeedForward(network, input[j]);
         printf("Response for inputs [%.1f, %.1f] is %f\n", input[j][0], input[j][1], response[0]);
     }
+    nn_WriteFile(network, "inputload.co");
     nn_Destroy(network);
     printf("DONE");
 }

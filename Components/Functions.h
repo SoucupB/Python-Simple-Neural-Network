@@ -29,6 +29,10 @@ float *func_NormalizeArray(float *buffer, int32_t size);
 int32_t func_ArraySum(int32_t *buffer, int32_t size);
 float func_RandomNumber(float min, float max);
 int32_t smin(int32_t a, int32_t b);
+void func_WriteInt32ToFile(FILE *fd, int32_t value);
+void func_WriteFloatToFile(FILE *fd, float value);
+int32_t func_ReadInt32FromFile(FILE *fd);
+float func_ReadFloatFromFile(FILE *fd);
 
 #ifdef __cplusplus
 }

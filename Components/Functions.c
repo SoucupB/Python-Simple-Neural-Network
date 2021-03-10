@@ -1,6 +1,7 @@
 #include "Functions.h"
 #include <stdlib.h>
 #include "StaticAllocator.h"
+#include <string.h>
 
 float func_Uniform(float left, float right) {
     float augumentedNumber = (float)rand() + 1;
@@ -23,6 +24,42 @@ float func_Tanh(float value) {
 float func_DTanh(float value) {
     float functionValue = func_Tanh(value);
     return 1.0 - functionValue * functionValue;
+}
+
+int32_t func_ReadInt32FromFile(FILE *fd) {
+    int32_t value;
+    char pointer[sizeof(int32_t)];
+    fscanf(fd, "%c", &pointer[0]);
+    fscanf(fd, "%c", &pointer[1]);
+    fscanf(fd, "%c", &pointer[2]);
+    fscanf(fd, "%c", &pointer[3]);
+    memcpy(&value, pointer, sizeof(int32_t));
+    return value;
+}
+
+float func_ReadFloatFromFile(FILE *fd) {
+    float value;
+    char pointer[sizeof(float)];
+    fscanf(fd, "%c", &pointer[0]);
+    fscanf(fd, "%c", &pointer[1]);
+    fscanf(fd, "%c", &pointer[2]);
+    fscanf(fd, "%c", &pointer[3]);
+    memcpy(&value, pointer, sizeof(float));
+    return value;
+}
+
+void func_WriteInt32ToFile(FILE *fd, int32_t value) {
+    char *buffer = (char *)&value;
+    for(int32_t i = 0; i < sizeof(int32_t); i++) {
+        fprintf(fd, "%c", buffer[i]);
+    }
+}
+
+void func_WriteFloatToFile(FILE *fd, float value) {
+    char *buffer = (char *)&value;
+    for(int32_t i = 0; i < sizeof(int32_t); i++) {
+        fprintf(fd, "%c", buffer[i]);
+    }
 }
 
 float func_Identity(float value) {

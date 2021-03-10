@@ -284,7 +284,6 @@ float nn_Optimize(NeuralNetwork net, float *input, float *output, int8_t type) {
 }
 
 void nn_WriteFile(NeuralNetwork net, char *fileName) {
-    FILE *fd = fopen(fileName, "w+");
     int32_t sum = func_ArraySum(net->structureBuffer, net->hdSize);
     int32_t *parents = malloc(sum * sum * sizeof(int32_t));
     int32_t *childs = malloc(sum * sum * sizeof(int32_t));
@@ -302,9 +301,12 @@ void nn_WriteFile(NeuralNetwork net, char *fileName) {
             }
         }
     }
-    fprintf(fd, "%d\n", size);
+    FILE *fd = fopen(fileName, "wb");
+    func_WriteInt32ToFile(fd, size);
     for(int32_t i = 0; i < size; i++) {
-        fprintf(fd, "%d %d %f\n", parents[i], childs[i], values[i]);
+        func_WriteInt32ToFile(fd, parents[i]);
+        func_WriteInt32ToFile(fd, childs[i]);
+        func_WriteFloatToFile(fd, values[i]);
     }
     free(parents);
     free(childs);
@@ -332,12 +334,14 @@ int32_t nn_GetProportionalRandomIndex(NeuralNetwork net, float *input) {
 }
 
 void nn_LoadFile(NeuralNetwork network, char *fileNanme) {
-    FILE *fd = fopen(fileNanme, "r+");
+    FILE *fd = fopen(fileNanme, "rb");
     int32_t totalWeights, a, b;
     float c;
-    fscanf(fd, "%d", &totalWeights);
+    totalWeights = func_ReadInt32FromFile(fd);
     for(int32_t i = 0; i < totalWeights; i++) {
-        fscanf(fd, "%d %d %f", &a, &b, &c);
+        a = func_ReadInt32FromFile(fd);
+        b = func_ReadInt32FromFile(fd);
+        c = func_ReadFloatFromFile(fd);
         saveWeightMatrix(network->allNeurons[0], a, b, c);
     }
     fclose(fd);
