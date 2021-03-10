@@ -44,8 +44,9 @@ NeuralNetwork nn_InitMetaParameters(int32_t *structureBuffer, int32_t size, floa
     neuralNetwork->functions = functions;
     neuralNetwork->dFunctions = dFunctions;
     neuralNetwork->train = 0;
+    neuralNetwork->inputOptimizer = nmalloc(sizeof(float) * structureBuffer[0]);
     int32_t ids = 0;
-    stat_Init(neuralNetwork, structureBuffer[size - 1] * sizeof(float));
+    //stat_Init(neuralNetwork, structureBuffer[size - 1] * sizeof(float));
     Neuron *layer = nmalloc(sizeof(Neuron) * structureBuffer[0]);
     Neuron *allNeurons = nmalloc(sizeof(Neuron) * (func_ArraySum(structureBuffer, size) + size - 1));
     int32_t neuronsIndex = 0;
@@ -186,7 +187,6 @@ float *feedForwardNormal(NeuralNetwork net, float *structureBuffer) {
 }
 
 float *nn_FeedForward(NeuralNetwork net, float *structureBuffer) {
-    stat_Switch(net);
     if(!net->train) {
         return feedForwardNormal(net, structureBuffer);
     }
@@ -195,7 +195,7 @@ float *nn_FeedForward(NeuralNetwork net, float *structureBuffer) {
 
 float *feedForwardTrain(NeuralNetwork net, float *structureBuffer) {
     int32_t size = net->structureBuffer[0];
-    float *result = stat_Alloc(sizeof(float) * size);
+    float *result = net->inputOptimizer;
     nn_ClearNeurons(net);
     for(int32_t i = 0; i < size; i++) {
         net->inputs[i]->value = structureBuffer[i];
@@ -279,7 +279,6 @@ float nn_Optimize(NeuralNetwork net, float *input, float *output, int8_t type) {
             }
         }
     }
-    stat_Free(inputResponse);
     net->train = 0;
     return totalError;
 }

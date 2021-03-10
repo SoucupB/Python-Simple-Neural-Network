@@ -42,6 +42,7 @@ struct NeuralNetwork_t {
     int32_t *structureBuffer;
     float ***matrixes;
     int32_t **prtStruct;
+    float *inputOptimizer;
 };
 
 

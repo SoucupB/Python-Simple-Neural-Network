@@ -3,7 +3,6 @@
 #include "Vector.h"
 #include <string.h>
 
-void *segmentMemory;
 int32_t allocationsCount;
 
 struct MemBuffer_t {
@@ -25,14 +24,14 @@ MemBuffer mem_Init(size_t size) {
 }
 
 void *block_Alloc(size_t size) {
-  void *block = malloc(size + sizeof(void *) * 2);
+  void *block = malloc(size + sizeof(void *));
   MemBuffer memStat = mem_Init(sizeof(void **));
   memcpy(block, &memStat, sizeof(MemBuffer));
-  return (char *)block + sizeof(void *) * 2;
+  return (char *)block + sizeof(void *);
 }
 
 void block_SwitchStatus(void *pointer) {
-  void *initOffset = (char *)pointer - sizeof(void *) * 2;
+  void *initOffset = (char *)pointer - sizeof(void *);
   MemBuffer buffer = *(MemBuffer *)initOffset;
   usedMemory = buffer;
 }
@@ -55,27 +54,6 @@ void mem_Delete(MemBuffer self) {
   free(self);
 }
 
-void stat_Init(void *pointer, size_t totalMemory) {
-  void *stats = malloc(totalMemory);
-  void *staticMemory = (char *)pointer - sizeof(void *);
-  memcpy(staticMemory, &stats, sizeof(void *));
-  segmentMemory = stats;
-}
-
-void stat_Switch(void *pointer) {
-  void *staticMemory = (char *)pointer - sizeof(void *);
-  memcpy(segmentMemory, staticMemory, sizeof(void *));
-}
-
-void *stat_Alloc(size_t totalMemory) {
-  allocationsCount++;
-  return segmentMemory;
-}
-
-void stat_Free(void *buffer) {
-  allocationsCount--;
-}
-
 void *nrealloc(void *buffer, size_t previousSize, size_t size) {
   void *newBuffer = nmalloc(size);
   memcpy(newBuffer, buffer, previousSize);
@@ -95,16 +73,13 @@ void nfree(void *buffer) {
 }
 
 void block_Destroy(void *pointer) {
-  void *initOffset = (char *)pointer - sizeof(void *) * 2;
-  void *statMemory = (char *)pointer - sizeof(void *);
+  void *initOffset = (char *)pointer - sizeof(void *);
   MemBuffer memState = *(MemBuffer *)initOffset;
   void **buffer = memState->buffer;
   for(int32_t i = 0; i < memState->size; i++) {
     nfree(buffer[i]);
   }
   mem_Delete(memState);
-  memcpy(segmentMemory, statMemory, sizeof(void *));
-  free(segmentMemory);
   free(initOffset);
 }
 
